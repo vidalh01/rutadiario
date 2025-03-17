@@ -1,14 +1,12 @@
 export class LCS {
 
-  static setData(key: string, value: any[]): void {
-    localStorage.setItem(key, JSON.stringify(value));
+  static setData(key: string, arr: any[]): void {
+    localStorage.setItem(key, JSON.stringify(arr));
   }
 
   static getData(key: string): any[] {
     const data = localStorage.getItem(key);
-
     let updateData: any[] = data ? JSON.parse(data) : [];
-
     return updateData
   }
 

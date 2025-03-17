@@ -118,6 +118,10 @@ function ftResetDia() {
 
   arrDatosPasajeros.value = [];
   arrDatosGastos.value = [];
+
+  LCS.setData("localDias", arrDatosDias.value);
+  LCS.setData("localPasajeros", arrDatosPasajeros.value);
+  LCS.setData("localGastos", arrDatosGastos.value);
 };
 
 
@@ -400,7 +404,7 @@ function ftDelGastos(index: number) {
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
-            <h1 class="modal-title fs-5" id="exampleModalLabel">Guardando... Dia</h1>
+            <h1 class="modal-title fs-5" id="exampleModalLabel">Guardando Dia... </h1>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
@@ -421,7 +425,7 @@ function ftDelGastos(index: number) {
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h1 class="modal-title fs-5" id="exampleModalLabel">Guardando... Dia</h1>
+          <h1 class="modal-title fs-5" id="exampleModalLabel">Reseteando...</h1>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
@@ -441,7 +445,7 @@ function ftDelGastos(index: number) {
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h1 class="modal-title fs-5" id="exampleModalLabel">Guardando...</h1>
+          <h1 class="modal-title fs-5" id="exampleModalLabel">Editando Dia...</h1>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
