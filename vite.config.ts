@@ -34,7 +34,7 @@ export default defineConfig({
       },
     }),
   ],
-  base: 'https://vidalh01.github.io/page-rutadiario/',
+  base: 'page-rutadiario/',
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
