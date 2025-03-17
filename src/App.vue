@@ -347,6 +347,9 @@ function ftDelGastos(index: number) {
                 </div>
               </div>
             </div>
+            <div v-else>
+              <p class="text-center">Vacio</p>
+            </div>
           </div>
         </div>
       </div>
@@ -451,7 +454,7 @@ function ftDelGastos(index: number) {
         <div class="modal-body">
 
           <h5 v-if="arrDatosDias[indexSave]">Dia a editar <span class="text-danger">{{ arrDatosDias[indexSave].fecha
-          }}</span></h5>
+              }}</span></h5>
 
           <div class="d-flex justify-content-center align-items-center">
             <label class="form-label w-25 me-2">dia

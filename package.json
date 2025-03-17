@@ -3,16 +3,20 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
+  "homepage": "https://vidalh01.github.io/rutadiario/",
   "scripts": {
     "dev": "vite",
     "build": "run-p type-check \"build-only {@}\" --",
     "preview": "vite preview",
     "build-only": "vite build",
-    "type-check": "vue-tsc --build"
+    "type-check": "vue-tsc --build",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist"
   },
   "dependencies": {
     "bootstrap": "^5.3.3",
     "bootstrap-icons": "^1.11.3",
+    "gh-pages": "^6.3.0",
     "vue": "^3.5.13",
     "vue-router": "^4.5.0"
   },

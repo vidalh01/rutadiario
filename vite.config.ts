@@ -7,6 +7,7 @@ import { VitePWA } from 'vite-plugin-pwa';
 
 // https://vite.dev/config/
 export default defineConfig({
+  base: '/rutadiario/', // ✅ Asegura que todo esté en la subcarpeta correcta
   plugins: [
     vue(),
     vueDevTools(),
@@ -15,26 +16,32 @@ export default defineConfig({
       manifest: {
         name: 'Ruta Diario',
         short_name: 'RutaDiario',
-        start_url: '/',
+        start_url: '/rutadiario/',
+        scope: '/rutadiario/',
         display: 'standalone',
         background_color: '#ffffff',
         theme_color: '#42b983',
         icons: [
           {
-            src: 'icon-192x192.png',
+            src: '/rutadiario/icon-192x192.png',
             sizes: '192x192',
             type: 'image/png',
           },
           {
-            src: 'icon-512x512.png',
+            src: '/rutadiario/icon-512x512.png',
             sizes: '512x512',
             type: 'image/png',
           },
         ],
       },
+      workbox: {
+        navigateFallback: '/rutadiario/index.html', // ✅ Redirección correcta en GitHub Pages
+      },
+      devOptions: {
+        enabled: true,
+      },
     }),
   ],
-  base: 'page-rutadiario/',
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
