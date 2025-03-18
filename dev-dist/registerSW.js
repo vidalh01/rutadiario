@@ -1,0 +1,1 @@
+if('serviceWorker' in navigator) navigator.serviceWorker.register('/rutadiario/dev-sw.js?dev-sw', { scope: '/rutadiario/', type: 'classic' })

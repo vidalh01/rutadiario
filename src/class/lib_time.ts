@@ -1,3 +1,4 @@
+
 class TM {
     // hora formateada
     static horaFormateada(): string {

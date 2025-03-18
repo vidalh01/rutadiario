@@ -28,23 +28,29 @@ let arrDatosDias = ref<any[]>([]);
 // al iniciar la aplicación, se obtienen los datos guardados en el localstorage
 onMounted(() => {
   try {
-    arrDatosPasajeros.value = LCS.getData("localPasajeros");
-    cantidadPasajeros.value = contador("localPasajeros", arrDatosPasajeros.value);
 
-    arrDatosGastos.value = LCS.getData("localGastos");
-    cantidadGastos.value = contador("localGastos", arrDatosGastos.value);
-
-    arrDatosDias.value = LCS.getData("localDias");
-
-
-    dineroBruto.value = cantidadPasajeros.value * 35;
-    dineroNeto.value = dineroBruto.value - cantidadGastos.value;
+    ftAmacenContadores()
 
   } catch (error) {
     console.error("Error al obtener datos del localStorage:", error);
     arrDatosPasajeros.value = [];
   }
 });
+
+// ft contadore
+function ftAmacenContadores() {
+  arrDatosPasajeros.value = LCS.getData("localPasajeros");
+  cantidadPasajeros.value = contador("localPasajeros", arrDatosPasajeros.value);
+
+  arrDatosGastos.value = LCS.getData("localGastos");
+  cantidadGastos.value = contador("localGastos", arrDatosGastos.value);
+
+  arrDatosDias.value = LCS.getData("localDias");
+
+  dineroBruto.value = cantidadPasajeros.value * 35;
+  dineroNeto.value = dineroBruto.value - cantidadGastos.value;
+
+};
 
 // contador
 function contador(key: string, arr: any[]) {
@@ -134,8 +140,6 @@ function ftGuardarDia() {
     fecha: fechaFormateada()
   });
 
-  LCS.setData("localDias", arrDatosDias.value);
-
   ftResetDia();
 
 };
@@ -167,17 +171,22 @@ function agregarGastos() {
 
 function ftDelPasajeros(index: number) {
   LCS.remData(arrDatosPasajeros.value, "localPasajeros", index);
+
+  ftAmacenContadores()
+
 };
 
 function ftDelGastos(index: number) {
   LCS.remData(arrDatosGastos.value, "localGastos", index);
+
+  ftAmacenContadores()
 };
 
 </script>
 
 <template>
 
-  <div class="container">
+  <div class="container text-center">
     <!-- Título -->
     <h1 class="my-4">Ruta Diario</h1>
 
@@ -240,164 +249,123 @@ function ftDelGastos(index: number) {
       </div>
     </div>
 
-    <div class="accordion accordion-flush text-center" id="accordionFlushExample">
-      <div class="accordion-item">
-        <h2 class="accordion-header">
-          <button class="accordion-button collapsed text-primary" type="button" data-bs-toggle="collapse"
-            data-bs-target="#flush-collapseOne" aria-expanded="false" aria-controls="flush-collapseOne">
-            Menu
-          </button>
-        </h2>
-        <div id="flush-collapseOne" class="accordion-collapse collapse" data-bs-parent="#accordionFlushExample">
-          <div class="accordion-body">
-            <button class="btn btn-primary w-100 my-2" data-bs-toggle="modal" data-bs-target="#modalGuardandoDia"
-              @click="ftGuardarDia">Guardar Dia</button>
-            <button class="btn btn-danger w-100" data-bs-toggle="modal" data-bs-target="#modalResetDia"
-              @click="ftResetDia">Reset Dia</button>
-          </div>
+    <!-- Tabla de pasajeros -->
+    <div v-if="arrDatosPasajeros.length" class="card">
+      <div class="card-header">
+        Tabla de pasajeros
+      </div>
+      <div class="card-body">
+        <h5 class="card-title">pasajeros</h5>
+        <div class="card-text">
+          <table class="table table-bordered table-striped my-3">
+
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">Cantidad</th>
+                <th scope="col">Hora</th>
+                <th scope="col">Del</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr v-for="(item, index) in arrDatosPasajeros" :key="index">
+                <td>{{ arrDatosPasajeros.length - index }}</td>
+                <td>{{ item.count }}</td>
+                <td>{{ item.hour }}</td>
+                <td><button class="btn btn-danger" @click="ftDelPasajeros(index)">X</button>
+                </td>
+              </tr>
+            </tbody>
+
+          </table>
         </div>
       </div>
-      <div class="accordion-item">
-        <h2 class="accordion-header">
-          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-            data-bs-target="#flush-collapseTwo" aria-expanded="false" aria-controls="flush-collapseTwo">
-            Tabla Pasajeros
-          </button>
-        </h2>
-        <div id="flush-collapseTwo" class="accordion-collapse collapse" data-bs-parent="#accordionFlushExample">
-          <div class="accordion-body">
-            <div v-if="arrDatosPasajeros.length" class="card">
-              <div class="card-header">
-                Tabla de pasajeros
-              </div>
-              <div class="card-body">
-                <h5 class="card-title">pasajeros</h5>
-                <div class="card-text">
-                  <!-- Tabla de pasajeros -->
-                  <table class="table table-bordered table-striped my-3">
+    </div>
+    <div v-else>
+      <p class="text-center">Vacio Pasajeros</p>
+    </div>
 
-                    <thead>
-                      <tr>
-                        <th scope="col">#</th>
-                        <th scope="col">Cantidad</th>
-                        <th scope="col">Hora</th>
-                        <th scope="col">Del</th>
-                      </tr>
-                    </thead>
 
-                    <tbody>
-                      <tr v-for="(item, index) in arrDatosPasajeros" :key="index">
-                        <td>{{ arrDatosPasajeros.length - index }}</td>
-                        <td>{{ item.count }}</td>
-                        <td>{{ item.hour }}</td>
-                        <td><button class="btn btn-danger" @click="ftDelPasajeros(index)">X</button>
-                        </td>
-                      </tr>
-                    </tbody>
+    <!-- Tabla de gastos -->
+    <div v-if="arrDatosGastos.length" class="card mb-3">
+      <div class="card-header">
+        Tabla de Gastos
+      </div>
+      <div class="card-body">
+        <h5 class="card-title">Gastos</h5>
+        <div class="card-text">
+          <table class="table table-bordered table-striped my-3">
 
-                  </table>
-                </div>
-              </div>
-            </div>
-            <div v-else>
-              <p class="text-center">Vacio</p>
-            </div>
-          </div>
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">Cantidad</th>
+                <th scope="col">Hora</th>
+                <th scope="col">Del</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr v-for="(item, index) in arrDatosGastos" :key="index">
+                <td>{{ arrDatosGastos.length - index }}</td>
+                <td>{{ item.count }}</td>
+                <td>{{ item.hour }}</td>
+                <td><button class="btn btn-danger" @click="ftDelGastos(index)">X</button>
+                </td>
+              </tr>
+            </tbody>
+
+          </table>
         </div>
       </div>
-      <div class="accordion-item">
-        <h2 class="accordion-header">
-          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-            data-bs-target="#flush-collapseThree" aria-expanded="false" aria-controls="flush-collapseThree">
-            Tabla de Gastos
-          </button>
-        </h2>
-        <div id="flush-collapseThree" class="accordion-collapse collapse" data-bs-parent="#accordionFlushExample">
-          <div class="accordion-body">
-            <div v-if="arrDatosGastos.length" class="card mb-3">
-              <div class="card-header">
-                Tabla de Gastos
-              </div>
-              <div class="card-body">
-                <h5 class="card-title">Gastos</h5>
-                <div class="card-text">
-                  <!-- Tabla de gastos -->
-                  <table class="table table-bordered table-striped my-3">
+    </div>
+    <div v-else>
+      <p class="text-center">Vacio Gastos</p>
+    </div>
 
-                    <thead>
-                      <tr>
-                        <th scope="col">#</th>
-                        <th scope="col">Cantidad</th>
-                        <th scope="col">Hora</th>
-                        <th scope="col">Del</th>
-                      </tr>
-                    </thead>
 
-                    <tbody>
-                      <tr v-for="(item, index) in arrDatosGastos" :key="index">
-                        <td>{{ arrDatosGastos.length - index }}</td>
-                        <td>{{ item.count }}</td>
-                        <td>{{ item.hour }}</td>
-                        <td><button class="btn btn-danger" @click="ftDelGastos(index)">X</button>
-                        </td>
-                      </tr>
-                    </tbody>
+    <!-- botones de menu -->
+    <div class="my-4">
+      <button class="btn btn-primary w-100 my-2" data-bs-toggle="modal" data-bs-target="#modalGuardandoDia"
+        @click="ftGuardarDia">Guardar Dia</button>
+      <button class="btn btn-danger w-100" data-bs-toggle="modal" data-bs-target="#modalResetDia"
+        @click="ftResetDia">Reset Dia</button>
+    </div>
 
-                  </table>
-                </div>
-              </div>
-            </div>
-            <div v-else>
-              <p class="text-center">Vacio</p>
-            </div>
-          </div>
-        </div>
+
+    <!-- Tabla de dias -->
+    <div v-if="arrDatosDias.length" class="card mb-3">
+      <div class="card-header">
+        Tabla de Dias
       </div>
-      <div class="accordion-item">
-        <h2 class="accordion-header">
-          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-n4"
-            aria-expanded="false" aria-controls="flush-n4">
-            Tabla Dias
-          </button>
-        </h2>
-        <div id="flush-n4" class="accordion-collapse collapse" data-bs-parent="#accordionFlushExample">
-          <div class="accordion-body">
-            <div v-if="arrDatosDias.length" class="card mb-3">
-              <div class="card-header">
-                Tabla de Dias
-              </div>
-              <div class="card-body">
-                <h5 class="card-title">Dias</h5>
-                <div class="card-text">
-                  <!-- Tabla de gastos -->
-                  <table class="table table-bordered table-striped my-3">
+      <div class="card-body">
+        <h5 class="card-title">Dias</h5>
+        <div class="card-text">
+          <table class="table table-bordered table-striped my-3">
 
-                    <thead>
-                      <tr>
-                        <th scope="col">fecha</th>
-                        <th scope="col">Pasajeros</th>
-                        <th scope="col">Gastos</th>
-                        <th scope="col">Dinero</th>
+            <thead>
+              <tr>
+                <th scope="col">fecha</th>
+                <th scope="col">Pasajeros</th>
+                <th scope="col">Gastos</th>
+                <th scope="col">Dinero</th>
 
-                      </tr>
-                    </thead>
+              </tr>
+            </thead>
 
-                    <tbody>
-                      <tr v-for="(item, index) in arrDatosDias" :key="index">
-                        <td @click="ftGuardandoIndex(index)" data-bs-toggle="modal" data-bs-target="#modalEditandoDia">
-                          {{
-                            item.fecha }}</td>
-                        <td>{{ item.pasajeros }}</td>
-                        <td>{{ item.gastos }}</td>
-                        <td>{{ item.dinero }}</td>
-                      </tr>
-                    </tbody>
+            <tbody>
+              <tr v-for="(item, index) in arrDatosDias" :key="index">
+                <td @click="ftGuardandoIndex(index)" data-bs-toggle="modal" data-bs-target="#modalEditandoDia">
+                  {{
+                    item.fecha }}</td>
+                <td>{{ item.pasajeros }}</td>
+                <td>{{ item.gastos }}</td>
+                <td>{{ item.dinero }}</td>
+              </tr>
+            </tbody>
 
-                  </table>
-                </div>
-              </div>
-            </div>
-          </div>
+          </table>
         </div>
       </div>
     </div>
@@ -454,15 +422,11 @@ function ftDelGastos(index: number) {
         <div class="modal-body">
 
           <h5 v-if="arrDatosDias[indexSave]">Dia a editar <span class="text-danger">{{ arrDatosDias[indexSave].fecha
-              }}</span></h5>
+          }}</span></h5>
 
-          <div class="d-flex justify-content-center align-items-center">
+          <div class="d-flex justify-content-center align-items-center text-center">
             <label class="form-label w-25 me-2">dia
-              <input v-model="dia" type="text" class="form-control" placeholder="dia">
-            </label>
-
-            <label class="form-label w-25 me-2">mes
-              <input v-model="mes" type="text" class="form-control" placeholder="mes">
+              <input v-model="dia" type="text" class="form-control text-center" placeholder="dia">
             </label>
           </div>
 
