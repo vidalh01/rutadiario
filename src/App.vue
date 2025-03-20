@@ -2,6 +2,7 @@
 
 import { onMounted, ref } from "vue";
 import { LCS } from "../src/class/lib_localstoraje";
+import { TM } from "../src/class/lib_time";
 
 let indexSave = ref<number>(-1);
 
@@ -21,47 +22,63 @@ interface interDatos {
   hour: string;
 }
 
-let arrDatosPasajeros = ref<interDatos[]>([]);
-let arrDatosGastos = ref<interDatos[]>([]);
-let arrDatosDias = ref<any[]>([]);
+let arrPasajeros = ref<interDatos[]>([]);
+let arrGastos = ref<interDatos[]>([]);
+let arrDias = ref<any[]>([]);
 
 // al iniciar la aplicación, se obtienen los datos guardados en el localstorage
 onMounted(() => {
   try {
-
     ftAmacenContadores()
-
   } catch (error) {
     console.error("Error al obtener datos del localStorage:", error);
-    arrDatosPasajeros.value = [];
+    arrPasajeros.value = [];
   }
 });
 
 // ft contadore
 function ftAmacenContadores() {
-  arrDatosPasajeros.value = LCS.getData("localPasajeros");
-  cantidadPasajeros.value = contador("localPasajeros", arrDatosPasajeros.value);
+  arrPasajeros.value = LCS.getData("localPasajeros");
+  cantidadPasajeros.value = contador("localPasajeros", arrPasajeros.value, 0);
 
-  arrDatosGastos.value = LCS.getData("localGastos");
-  cantidadGastos.value = contador("localGastos", arrDatosGastos.value);
+  arrGastos.value = LCS.getData("localGastos");
+  cantidadGastos.value = contador("localGastos", arrGastos.value, 1600);
 
-  arrDatosDias.value = LCS.getData("localDias");
+  arrDias.value = LCS.getData("localDias");
 
   dineroBruto.value = cantidadPasajeros.value * 35;
   dineroNeto.value = dineroBruto.value - cantidadGastos.value;
 
 };
 
+// funcion reset
+function ftResetDia() {
+  cantidadPasajeros.value = 0;
+  cantidadGastos.value = 1600;
+  dineroBruto.value = 0;
+  dineroNeto.value = 0;
+
+  arrPasajeros.value = [];
+  arrGastos.value = [];
+
+  arrGastos.value.unshift(objDatos(String(cantidadGastos.value)));
+
+  LCS.setData("localDias", arrDias.value);
+  LCS.setData("localPasajeros", arrPasajeros.value);
+  LCS.setData("localGastos", arrGastos.value);
+
+  ftAmacenContadores()
+};
+
 // contador
-function contador(key: string, arr: any[]) {
+function contador(key: string, arr: any[], acumulador: number) {
   arr = LCS.getData(key);
-  let r = 0
 
   arr.forEach((item) => {
-    r += parseInt(item.count);
+    acumulador += parseInt(item.count);
   });
 
-  return r;
+  return acumulador;
 };
 
 // hora formateada
@@ -102,12 +119,14 @@ function objDatos(cantidad: string): interDatos {
 
 // guardar nueva fecha
 function guardarNuevaFecha() {
-  arrDatosDias.value[indexSave.value].fecha = nuevaFecha();
-  LCS.setData("localDias", arrDatosDias.value);
+  arrDias.value[indexSave.value].fecha = nuevaFecha();
+  LCS.setData("localDias", arrDias.value);
 
   dia.value = "";
 };
 
+
+// guardar index
 function ftGuardandoIndex(index: number) {
   indexSave.value = index;
 
@@ -116,24 +135,9 @@ function ftGuardandoIndex(index: number) {
 
 };
 
-function ftResetDia() {
-  cantidadPasajeros.value = 0;
-  cantidadGastos.value = 0;
-  dineroBruto.value = 0;
-  dineroNeto.value = 0;
-
-  arrDatosPasajeros.value = [];
-  arrDatosGastos.value = [];
-
-  LCS.setData("localDias", arrDatosDias.value);
-  LCS.setData("localPasajeros", arrDatosPasajeros.value);
-  LCS.setData("localGastos", arrDatosGastos.value);
-};
-
-
 // guardar dia
 function ftGuardarDia() {
-  arrDatosDias.value.unshift({
+  arrDias.value.unshift({
     pasajeros: cantidadPasajeros.value,
     gastos: cantidadGastos.value,
     dinero: dineroNeto.value,
@@ -144,15 +148,29 @@ function ftGuardarDia() {
 
 };
 
+
+function ftAgregarMovimiento() {
+  if (nuevoPasajero.value !== "") {
+    console.log("add pasajeros")
+    agregarPasajeros()
+  }
+
+  if (nuevoGasto.value !== "") {
+    console.log("add gastos")
+    agregarGastos()
+  }
+};
+
+
 function agregarPasajeros() {
   cantidadPasajeros.value += parseInt(nuevoPasajero.value);
 
   dineroBruto.value = cantidadPasajeros.value * 35;
   dineroNeto.value = dineroBruto.value - cantidadGastos.value;
 
-  arrDatosPasajeros.value.unshift(objDatos(nuevoPasajero.value));
+  arrPasajeros.value.unshift(objDatos(nuevoPasajero.value));
 
-  LCS.setData("localPasajeros", arrDatosPasajeros.value);
+  LCS.setData("localPasajeros", arrPasajeros.value);
 
   nuevoPasajero.value = "";
 };
@@ -162,22 +180,22 @@ function agregarGastos() {
 
   dineroNeto.value = dineroBruto.value - cantidadGastos.value;
 
-  arrDatosGastos.value.unshift(objDatos(nuevoGasto.value));
+  arrGastos.value.unshift(objDatos(nuevoGasto.value));
 
-  LCS.setData("localGastos", arrDatosGastos.value);
+  LCS.setData("localGastos", arrGastos.value);
 
   nuevoGasto.value = "";
 };
 
 function ftDelPasajeros(index: number) {
-  LCS.remData(arrDatosPasajeros.value, "localPasajeros", index);
+  LCS.remData(arrPasajeros.value, "localPasajeros", index);
 
   ftAmacenContadores()
 
 };
 
 function ftDelGastos(index: number) {
-  LCS.remData(arrDatosGastos.value, "localGastos", index);
+  LCS.remData(arrGastos.value, "localGastos", index);
 
   ftAmacenContadores()
 };
@@ -190,10 +208,73 @@ function ftDelGastos(index: number) {
     <!-- Título -->
     <h1 class="my-4">Ruta Diario</h1>
 
+    <button style="z-index: 1;" class=" btn btn-success w-25 m-3 position-fixed top-0 start-0"
+      data-bs-toggle="offcanvas" data-bs-target="#staticBackdrop" aria-controls="staticBackdrop">
+      Menu
+    </button>
+
+    <div class="offcanvas offcanvas-start" data-bs-backdrop="static" tabindex="-1" id="staticBackdrop"
+      aria-labelledby="staticBackdropLabel">
+      <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="staticBackdropLabel">Menu > Ruta Diario</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+      </div>
+      <div class="offcanvas-body">
+        <div>
+          <ul class="list-group">
+            <li class="list-group-item">
+              <!-- botones caraga y descarga -->
+              botones carga y descarga
+              <div class="my-4">
+                <button class="btn btn-secondary w-100 my-3" data-bs-dismiss="offcanvas">Cargar</button>
+                <button class="btn btn-dark w-100" data-bs-dismiss="offcanvas">Descargar</button>
+              </div>
+            </li>
+
+            <li class="list-group-item">
+              <!-- botones de menu -->
+              botones de menu
+              <div class="my-4">
+                <button class="btn btn-primary w-100 my-3" data-bs-dismiss="offcanvas" @click="ftGuardarDia">Guardar
+                  Dia</button>
+                <button class="btn btn-danger w-100" data-bs-dismiss="offcanvas" @click="ftResetDia">Reset Dia</button>
+              </div>
+            </li>
+            <li class="list-group-item my-4 text-start">
+              <p>
+                <strong>Detalle: colores con gasto pre-establecidos</strong>
+              </p>
+              <div>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                  class="bi bi-circle bg-danger rounded-circle mx-2" viewBox="0 0 16 16">
+                  <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
+                </svg>
+                Control, ruta y gas
+              </div>
+              <div>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                  class="bi bi-circle bg-warning rounded-circle mx-2" viewBox="0 0 16 16">
+                  <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
+                </svg>
+                Brenda
+              </div>
+              <div>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                  class="bi bi-circle bg-success rounded-circle mx-2" viewBox="0 0 16 16">
+                  <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
+                </svg>
+                Ganancias
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
     <!-- Card con la información -->
     <div class="card mb-3">
       <div class="card-header d-flex justify-content-between align-items-center">
-        <label for="">Como va tu dia</label>
+        <label for="">Detalles Del Dia <span class="text-danger">{{ TM.fechaFormateada() }}</span></label>
         <div v-if="dineroBruto < 1100">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
             class="bi bi-circle bg-danger rounded-circle" viewBox="0 0 16 16">
@@ -216,7 +297,7 @@ function ftDelGastos(index: number) {
       <div class="card-body">
         <h5 class="card-title"></h5>
         <p class="card-text">
-          <strong>Cantidad de Pasajeros:</strong> ${{ cantidadPasajeros }} <br>
+          <strong>Cantidad de Pasajeros:</strong> {{ cantidadPasajeros }} <br>
           <strong>Cantidad de Gastos:</strong> ${{ cantidadGastos }} <br>
           <strong>Dinero Bruto:</strong> ${{ dineroBruto }} <br>
           <strong>Dinero Neto:</strong> ${{ dineroNeto }}
@@ -226,36 +307,41 @@ function ftDelGastos(index: number) {
 
     <!-- card registar datos -->
     <div class="card mb-3">
+
       <div class="card-header">
         Registrar Datos
       </div>
+
       <div class="card-body">
         <h5 class="card-title">Cantidades</h5>
         <div class="card-text">
+
           <!-- Input y botón para agregar pasajeros -->
           <div class="my-3 d-flex justify-content-between align-items-center">
             <label class="me-3" for="">Pasajeros</label>
-            <input v-model="nuevoPasajero" class="form-control d-inline-block w-50" placeholder="Agregar pasajeros">
-            <button class="btn btn-primary ms-2" @click="agregarPasajeros">Agregar</button>
+            <input pattern="[0-9]*" inputmode="numeric" v-model="nuevoPasajero" class="form-control d-inline-block w-50"
+              placeholder="Agregar pasajeros">
           </div>
 
           <!-- Input y botón para agregar gastos -->
           <div class="my-3 d-flex justify-content-between align-items-center">
             <label class="me-3" for="">Gastos</label>
-            <input v-model="nuevoGasto" class="form-control d-inline-block w-50" placeholder="Agregar gastos">
-            <button class="btn btn-primary ms-2" @click="agregarGastos">Agregar</button>
+            <input pattern="[0-9]*" inputmode="numeric" v-model="nuevoGasto" class="form-control d-inline-block w-50"
+              placeholder="Agregar gastos">
           </div>
+
+          <button class="btn btn-primary ms-2 w-100" @click="ftAgregarMovimiento">Agregar</button>
         </div>
       </div>
     </div>
 
     <!-- Tabla de pasajeros -->
-    <div v-if="arrDatosPasajeros.length" class="card">
+    <div v-if="arrPasajeros.length" class="card my-3">
       <div class="card-header">
         Tabla de pasajeros
       </div>
       <div class="card-body">
-        <h5 class="card-title">pasajeros</h5>
+        <h5 class="card-title">Pasajeros</h5>
         <div class="card-text">
           <table class="table table-bordered table-striped my-3">
 
@@ -269,8 +355,8 @@ function ftDelGastos(index: number) {
             </thead>
 
             <tbody>
-              <tr v-for="(item, index) in arrDatosPasajeros" :key="index">
-                <td>{{ arrDatosPasajeros.length - index }}</td>
+              <tr v-for="(item, index) in arrPasajeros" :key="index">
+                <td>{{ arrPasajeros.length - index }}</td>
                 <td>{{ item.count }}</td>
                 <td>{{ item.hour }}</td>
                 <td><button class="btn btn-danger" @click="ftDelPasajeros(index)">X</button>
@@ -288,7 +374,7 @@ function ftDelGastos(index: number) {
 
 
     <!-- Tabla de gastos -->
-    <div v-if="arrDatosGastos.length" class="card mb-3">
+    <div v-if="arrGastos.length" class="card my-3">
       <div class="card-header">
         Tabla de Gastos
       </div>
@@ -307,8 +393,8 @@ function ftDelGastos(index: number) {
             </thead>
 
             <tbody>
-              <tr v-for="(item, index) in arrDatosGastos" :key="index">
-                <td>{{ arrDatosGastos.length - index }}</td>
+              <tr v-for="(item, index) in arrGastos" :key="index">
+                <td>{{ arrGastos.length - index }}</td>
                 <td>{{ item.count }}</td>
                 <td>{{ item.hour }}</td>
                 <td><button class="btn btn-danger" @click="ftDelGastos(index)">X</button>
@@ -324,18 +410,8 @@ function ftDelGastos(index: number) {
       <p class="text-center">Vacio Gastos</p>
     </div>
 
-
-    <!-- botones de menu -->
-    <div class="my-4">
-      <button class="btn btn-primary w-100 my-2" data-bs-toggle="modal" data-bs-target="#modalGuardandoDia"
-        @click="ftGuardarDia">Guardar Dia</button>
-      <button class="btn btn-danger w-100" data-bs-toggle="modal" data-bs-target="#modalResetDia"
-        @click="ftResetDia">Reset Dia</button>
-    </div>
-
-
     <!-- Tabla de dias -->
-    <div v-if="arrDatosDias.length" class="card mb-3">
+    <div v-if="arrDias.length" class="card my-3">
       <div class="card-header">
         Tabla de Dias
       </div>
@@ -355,7 +431,7 @@ function ftDelGastos(index: number) {
             </thead>
 
             <tbody>
-              <tr v-for="(item, index) in arrDatosDias" :key="index">
+              <tr v-for="(item, index) in arrDias" :key="index">
                 <td @click="ftGuardandoIndex(index)" data-bs-toggle="modal" data-bs-target="#modalEditandoDia">
                   {{
                     item.fecha }}</td>
@@ -421,8 +497,8 @@ function ftDelGastos(index: number) {
         </div>
         <div class="modal-body">
 
-          <h5 v-if="arrDatosDias[indexSave]">Dia a editar <span class="text-danger">{{ arrDatosDias[indexSave].fecha
-          }}</span></h5>
+          <h5 v-if="arrDias[indexSave]">Dia a editar <span class="text-danger">{{ arrDias[indexSave].fecha
+              }}</span></h5>
 
           <div class="d-flex justify-content-center align-items-center text-center">
             <label class="form-label w-25 me-2">dia

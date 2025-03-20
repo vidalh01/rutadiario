@@ -1,5 +1,5 @@
 
-class TM {
+export class TM {
     // hora formateada
     static horaFormateada(): string {
         const now = new Date();
