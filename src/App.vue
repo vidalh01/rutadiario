@@ -3,6 +3,7 @@
 import { onMounted, ref } from "vue";
 import { LCS } from "../src/class/lib_localstoraje";
 import { TM } from "../src/class/lib_time";
+import { TXT } from "./class/lib_read_save_txt";
 
 let indexSave = ref<number>(-1);
 
@@ -25,6 +26,9 @@ interface interDatos {
 let arrPasajeros = ref<interDatos[]>([]);
 let arrGastos = ref<interDatos[]>([]);
 let arrDias = ref<any[]>([]);
+
+const fileInput = ref<HTMLInputElement | null>(null);
+const fileContent = ref<string>("");
 
 // al iniciar la aplicación, se obtienen los datos guardados en el localstorage
 onMounted(() => {
@@ -60,8 +64,6 @@ function ftResetDia() {
 
   arrPasajeros.value = [];
   arrGastos.value = [];
-
-  arrGastos.value.unshift(objDatos(String(cantidadGastos.value)));
 
   LCS.setData("localDias", arrDias.value);
   LCS.setData("localPasajeros", arrPasajeros.value);
@@ -148,7 +150,7 @@ function ftGuardarDia() {
 
 };
 
-
+// agregar movimientos
 function ftAgregarMovimiento() {
   if (nuevoPasajero.value !== "") {
     console.log("add pasajeros")
@@ -161,7 +163,7 @@ function ftAgregarMovimiento() {
   }
 };
 
-
+// agregar pasajeros
 function agregarPasajeros() {
   cantidadPasajeros.value += parseInt(nuevoPasajero.value);
 
@@ -175,6 +177,8 @@ function agregarPasajeros() {
   nuevoPasajero.value = "";
 };
 
+
+// agregar gastos
 function agregarGastos() {
   cantidadGastos.value += parseInt(nuevoGasto.value);
 
@@ -187,6 +191,7 @@ function agregarGastos() {
   nuevoGasto.value = "";
 };
 
+// borrar pasajeros
 function ftDelPasajeros(index: number) {
   LCS.remData(arrPasajeros.value, "localPasajeros", index);
 
@@ -194,11 +199,23 @@ function ftDelPasajeros(index: number) {
 
 };
 
+//  borrar gastos
 function ftDelGastos(index: number) {
   LCS.remData(arrGastos.value, "localGastos", index);
 
   ftAmacenContadores()
 };
+
+// descargar locarstorage a txt
+function descargarTXT() {
+  TXT.descargar(arrDias.value)
+};
+
+// leer txt
+function cargarTXT() {
+  TXT.cargar(fileInput)
+};
+
 
 </script>
 
@@ -224,11 +241,14 @@ function ftDelGastos(index: number) {
           <ul class="list-group">
             <li class="list-group-item">
               <!-- botones caraga y descarga -->
-              botones carga y descarga
+              Botones Carga y Descarga
               <div class="my-4">
                 <button class="btn btn-secondary w-100 my-3" data-bs-dismiss="offcanvas">Cargar</button>
-                <button class="btn btn-dark w-100" data-bs-dismiss="offcanvas">Descargar</button>
+                <button class="btn btn-dark w-100" data-bs-dismiss="offcanvas" @click="descargarTXT">Descargar</button>
               </div>
+
+              <input type="file" @change="cargarTXT" accept=".txt" />
+              <!-- <pre>{{ fileContent }}</pre> -->
             </li>
 
             <li class="list-group-item">
