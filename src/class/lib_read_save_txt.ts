@@ -1,33 +1,19 @@
 export class TXT {
 
-    static cargar(fileInput: any) {
-        // Verificar si hay archivos seleccionados antes de proceder
-        if (!fileInput?.files?.length) {
-            console.log("No se ha seleccionado ningún archivo.");
-            return;
-        }
+    static readFile(event: Event) {
 
-        // Función que maneja la lectura del archivo
-        const readFile = () => {
-            const file = fileInput.files[0]; // Obtener el primer archivo
+        let fileContent = ""
+        const file = (event.target as HTMLInputElement).files?.[0];
 
-            const reader = new FileReader(); // Instanciar un nuevo FileReader
+        if (!file) return;
 
-            reader.onload = () => {
-                let fileContent = reader.result as string; // El contenido del archivo
-                console.log(fileContent); // Mostrar el contenido del archivo
-            };
-
-            reader.onerror = (error) => {
-                console.error("Error al leer el archivo", error);
-            };
-
-            // Leer el archivo como texto
-            reader.readAsText(file);
+        const reader = new FileReader();
+        reader.onload = () => {
+            fileContent = reader.result as string;
+            console.log(fileContent)
         };
-
-        readFile(); // Llamar a la función para leer el archivo
-    }
+        reader.readAsText(file);
+    };
 
     /**
      * 

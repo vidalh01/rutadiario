@@ -27,8 +27,24 @@ let arrPasajeros = ref<interDatos[]>([]);
 let arrGastos = ref<interDatos[]>([]);
 let arrDias = ref<any[]>([]);
 
-const fileInput = ref<HTMLInputElement | null>(null);
-const fileContent = ref<string>("");
+
+function readFile(event: Event) {
+  let fileContent = ""
+  const file = (event.target as HTMLInputElement).files?.[0];
+
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = () => {
+    fileContent = reader.result as string;
+    console.log(fileContent)
+    arrDias = JSON.parse(fileContent)
+    LCS.setData("localDias", arrDias.value)
+    ftAmacenContadores()
+  };
+  reader.readAsText(file);
+};
+
 
 // al iniciar la aplicación, se obtienen los datos guardados en el localstorage
 onMounted(() => {
@@ -211,12 +227,6 @@ function descargarTXT() {
   TXT.descargar(arrDias.value)
 };
 
-// leer txt
-function cargarTXT() {
-  TXT.cargar(fileInput)
-};
-
-
 </script>
 
 <template>
@@ -247,8 +257,7 @@ function cargarTXT() {
                 <button class="btn btn-dark w-100" data-bs-dismiss="offcanvas" @click="descargarTXT">Descargar</button>
               </div>
 
-              <input type="file" @change="cargarTXT" accept=".txt" />
-              <!-- <pre>{{ fileContent }}</pre> -->
+              <input type="file" @change="readFile" accept=".txt" />
             </li>
 
             <li class="list-group-item">
@@ -518,7 +527,7 @@ function cargarTXT() {
         <div class="modal-body">
 
           <h5 v-if="arrDias[indexSave]">Dia a editar <span class="text-danger">{{ arrDias[indexSave].fecha
-              }}</span></h5>
+          }}</span></h5>
 
           <div class="d-flex justify-content-center align-items-center text-center">
             <label class="form-label w-25 me-2">dia
