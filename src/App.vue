@@ -4,7 +4,6 @@ import { onMounted, ref } from "vue";
 import { LCS } from "../src/class/lib_localstoraje";
 import { TM } from "../src/class/lib_time";
 import { TXT } from "./class/lib_read_save_txt";
-import { getJSDocReturnType } from "typescript";
 
 let indexSave = ref<number>(-1);
 
@@ -340,14 +339,6 @@ function descargarTXT() {
               </div>
             </li>
 
-            <!-- <li class="list-group-item my-3">
-              <p>Modo Editor: interructor</p>
-              <button v-if="bl_edit" class="btn btn-success" data-bs-dismiss="offcanvas"
-                @click="ftModeEdit()">Activado</button>
-              <button v-if="!bl_edit" class="btn btn-danger" data-bs-dismiss="offcanvas"
-                @click="ftModeEdit()">Desativado</button>
-            </li> -->
-
             <li class="list-group-item my-3">
               <!-- botones caraga y descarga -->
               Botones Carga y Descarga
@@ -632,7 +623,7 @@ function descargarTXT() {
         <div class="modal-body">
 
           <h5 v-if="arrDias[indexSave]">Dia a editar <span class="text-danger">{{ arrDias[indexSave].fecha
-              }}</span></h5>
+          }}</span></h5>
 
           <div class="d-flex justify-content-center align-items-center text-center">
             <label class="form-label w-25 me-2">dia
