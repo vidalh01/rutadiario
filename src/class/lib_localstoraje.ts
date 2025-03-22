@@ -10,9 +10,20 @@ export class LCS {
     return updateData
   }
 
-  static remData(arr: any, key: string, index: number) {
+  static remData(arr: any[], key: string, index: number) {
     arr.splice(index, 1);
     this.setData(key, arr);
+  };
+
+  static addData(key: string, arr: any[], xData: any, isInitial: boolean = false) {
+    if (isInitial) {
+      arr.unshift(xData)
+    } else {
+      arr.push(xData)
+    }
+
+    this.setData(key, arr);
+
   };
 
   static delData(key: string): void {

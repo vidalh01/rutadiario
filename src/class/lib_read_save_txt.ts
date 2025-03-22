@@ -1,24 +1,29 @@
 export class TXT {
 
-    static readFile(event: Event) {
+    static cargar(event: Event): Promise<any> {
+        return new Promise((resolve, reject) => {
+            const file = (event.target as HTMLInputElement).files?.[0];
 
-        let fileContent = ""
-        const file = (event.target as HTMLInputElement).files?.[0];
+            if (file) {
+                const reader = new FileReader();
 
-        if (!file) return;
+                reader.onload = () => {
+                    const fileContent = reader.result as string;
+                    resolve(fileContent);
+                };
 
-        const reader = new FileReader();
-        reader.onload = () => {
-            fileContent = reader.result as string;
-            console.log(fileContent)
-        };
-        reader.readAsText(file);
-    };
+                reader.readAsText(file);
+            } else {
+                reject("No se ha seleccionado ningún archivo");
+            }
+        });
+    }
 
     /**
      * 
      * @param xData es una variable array que sera transformada a texto
      */
+
     static descargar(xData: any[]) {
         // text a text
         let parseTExt = JSON.stringify(xData)

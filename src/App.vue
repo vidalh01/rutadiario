@@ -18,6 +18,10 @@ let nuevoGasto = ref<string>("");
 let dia = ref<string>("");
 let mes = ref<string>("");
 
+let bl_edit = ref<boolean>(false);
+let alt_eliminar = ref<boolean>(false);
+let alt_agregar = ref<boolean>(false);
+
 interface interDatos {
   count: string;
   hour: string;
@@ -28,23 +32,20 @@ let arrGastos = ref<interDatos[]>([]);
 let arrDias = ref<any[]>([]);
 
 
-function readFile(event: Event) {
-  let fileContent = ""
-  const file = (event.target as HTMLInputElement).files?.[0];
-
-  if (!file) return;
-
-  const reader = new FileReader();
-  reader.onload = () => {
-    fileContent = reader.result as string;
-    console.log(fileContent)
-    arrDias = JSON.parse(fileContent)
+function readFile(ev: Event) {
+  TXT.cargar(ev).then((res) => {
+    arrDias.value = JSON.parse(res)
     LCS.setData("localDias", arrDias.value)
     ftAmacenContadores()
-  };
-  reader.readAsText(file);
-};
+  }).catch((error) => {
+    console.error(error);
+  });
+}
 
+// interructor modo editor
+function ftModeEdit() {
+  bl_edit.value = !bl_edit.value
+}
 
 // al iniciar la aplicación, se obtienen los datos guardados en el localstorage
 onMounted(() => {
@@ -177,6 +178,9 @@ function ftAgregarMovimiento() {
     console.log("add gastos")
     agregarGastos()
   }
+
+  resetAlertaAgregar()
+
 };
 
 // agregar pasajeros
@@ -207,16 +211,42 @@ function agregarGastos() {
   nuevoGasto.value = "";
 };
 
+// reset alerta eliminar
+function resetAlertaAgregar() {
+  alt_agregar.value = true
+  setTimeout(() => {
+    alt_agregar.value = false
+  }, 3000);
+};
+
+// reset alerta eliminar
+function resetAlertaEliminar() {
+  alt_eliminar.value = true
+  bl_edit.value = false
+  setTimeout(() => {
+    alt_eliminar.value = false
+    bl_edit.value = true
+
+  }, 3000);
+};
+
 // borrar pasajeros
 function ftDelPasajeros(index: number) {
+
+  resetAlertaEliminar()
+
   LCS.remData(arrPasajeros.value, "localPasajeros", index);
 
   ftAmacenContadores()
+
 
 };
 
 //  borrar gastos
 function ftDelGastos(index: number) {
+
+  resetAlertaEliminar()
+
   LCS.remData(arrGastos.value, "localGastos", index);
 
   ftAmacenContadores()
@@ -230,6 +260,20 @@ function descargarTXT() {
 </script>
 
 <template>
+
+  <div v-if="alt_eliminar" style="z-index: 1;"
+    class="d-flex justify-content-center align-items-center position-fixed bottom-0 start-50 translate-middle-x">
+    <div class="alert alert-danger" role="alert">
+      Se eliminó un elemento
+    </div>
+  </div>
+
+  <div v-if="alt_agregar" style="z-index: 1;"
+    class="d-flex justify-content-center align-items-center position-fixed bottom-0 start-50 translate-middle-x">
+    <div class="alert alert-primary" role="alert">
+      Se agrego un elemento
+    </div>
+  </div>
 
   <div class="container text-center">
     <!-- Título -->
@@ -249,18 +293,7 @@ function descargarTXT() {
       <div class="offcanvas-body">
         <div>
           <ul class="list-group">
-            <li class="list-group-item">
-              <!-- botones caraga y descarga -->
-              Botones Carga y Descarga
-              <div class="my-4">
-                <button class="btn btn-secondary w-100 my-3" data-bs-dismiss="offcanvas">Cargar</button>
-                <button class="btn btn-dark w-100" data-bs-dismiss="offcanvas" @click="descargarTXT">Descargar</button>
-              </div>
-
-              <input type="file" @change="readFile" accept=".txt" />
-            </li>
-
-            <li class="list-group-item">
+            <li class="list-group-item my-3">
               <!-- botones de menu -->
               botones de menu
               <div class="my-4">
@@ -269,7 +302,29 @@ function descargarTXT() {
                 <button class="btn btn-danger w-100" data-bs-dismiss="offcanvas" @click="ftResetDia">Reset Dia</button>
               </div>
             </li>
-            <li class="list-group-item my-4 text-start">
+
+            <li class="list-group-item my-3">
+              <p>Modo Editor: interructor</p>
+              <button v-if="bl_edit" class="btn btn-success" data-bs-dismiss="offcanvas"
+                @click="ftModeEdit()">Activado</button>
+              <button v-if="!bl_edit" class="btn btn-danger" data-bs-dismiss="offcanvas"
+                @click="ftModeEdit()">Desativado</button>
+            </li>
+
+            <li class="list-group-item my-3">
+              <!-- botones caraga y descarga -->
+              Botones Carga y Descarga
+              <div class="my-4">
+                <button class="btn btn-dark w-100" data-bs-dismiss="offcanvas" @click="descargarTXT">Descargar</button>
+              </div>
+
+              <div>
+                <label class="my-4" for="">Buscar y Cargar DB</label>
+                <input data-bs-dismiss="offcanvas" type="file" @change="readFile" accept=".txt" />
+              </div>
+            </li>
+
+            <li class="list-group-item my-3 text-start">
               <p>
                 <strong>Detalle: colores con gasto pre-establecidos</strong>
               </p>
@@ -327,9 +382,10 @@ function descargarTXT() {
         <h5 class="card-title"></h5>
         <p class="card-text">
           <strong>Cantidad de Pasajeros:</strong> {{ cantidadPasajeros }} <br>
-          <strong>Cantidad de Gastos:</strong> ${{ cantidadGastos }} <br>
+          <strong>Cantidad de Gastos:</strong><span class="text-danger"> ${{ cantidadGastos }}</span> <br>
           <strong>Dinero Bruto:</strong> ${{ dineroBruto }} <br>
-          <strong>Dinero Neto:</strong> ${{ dineroNeto }}
+          <strong>Dinero Neto:</strong> <span
+            :class="{ 'text-danger': dineroNeto < 0, 'text-success': dineroNeto > 0 }">${{ dineroNeto }}</span>
         </p>
       </div>
     </div>
@@ -366,6 +422,7 @@ function descargarTXT() {
 
     <!-- Tabla de pasajeros -->
     <div v-if="arrPasajeros.length" class="card my-3">
+
       <div class="card-header">
         Tabla de pasajeros
       </div>
@@ -388,7 +445,7 @@ function descargarTXT() {
                 <td>{{ arrPasajeros.length - index }}</td>
                 <td>{{ item.count }}</td>
                 <td>{{ item.hour }}</td>
-                <td><button class="btn btn-danger" @click="ftDelPasajeros(index)">X</button>
+                <td><button :disabled="!bl_edit" class="btn btn-danger" @click="ftDelPasajeros(index)">X</button>
                 </td>
               </tr>
             </tbody>
@@ -426,7 +483,7 @@ function descargarTXT() {
                 <td>{{ arrGastos.length - index }}</td>
                 <td>{{ item.count }}</td>
                 <td>{{ item.hour }}</td>
-                <td><button class="btn btn-danger" @click="ftDelGastos(index)">X</button>
+                <td><button :disabled="!bl_edit" class="btn btn-danger" @click="ftDelGastos(index)">X</button>
                 </td>
               </tr>
             </tbody>
@@ -544,6 +601,8 @@ function descargarTXT() {
       </div>
     </div>
   </div>
+
+
 
 </template>
 
