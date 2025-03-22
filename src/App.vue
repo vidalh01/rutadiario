@@ -4,6 +4,7 @@ import { onMounted, ref } from "vue";
 import { LCS } from "../src/class/lib_localstoraje";
 import { TM } from "../src/class/lib_time";
 import { TXT } from "./class/lib_read_save_txt";
+import { getJSDocReturnType } from "typescript";
 
 let indexSave = ref<number>(-1);
 
@@ -19,8 +20,10 @@ let dia = ref<string>("");
 let mes = ref<string>("");
 
 let bl_edit = ref<boolean>(false);
+let bl_agregar = ref<boolean>(false);
 let alt_eliminar = ref<boolean>(false);
 let alt_agregar = ref<boolean>(false);
+let alt_guardar = ref<boolean>(false);
 
 interface interDatos {
   count: string;
@@ -156,6 +159,9 @@ function ftGuardandoIndex(index: number) {
 
 // guardar dia
 function ftGuardarDia() {
+
+  if (cantidadPasajeros.value == 0 || dineroBruto.value == 0) return
+
   arrDias.value.unshift({
     pasajeros: cantidadPasajeros.value,
     gastos: cantidadGastos.value,
@@ -163,6 +169,7 @@ function ftGuardarDia() {
     fecha: fechaFormateada()
   });
 
+  alertaGuardar()
   ftResetDia();
 
 };
@@ -214,8 +221,19 @@ function agregarGastos() {
 // reset alerta eliminar
 function resetAlertaAgregar() {
   alt_agregar.value = true
+  bl_agregar.value = true
   setTimeout(() => {
     alt_agregar.value = false
+    bl_agregar.value = false
+
+  }, 3000);
+};
+
+// alerta guardar
+function alertaGuardar() {
+  alt_guardar.value = true
+  setTimeout(() => {
+    alt_guardar.value = false
   }, 3000);
 };
 
@@ -226,7 +244,6 @@ function resetAlertaEliminar() {
   setTimeout(() => {
     alt_eliminar.value = false
     bl_edit.value = true
-
   }, 3000);
 };
 
@@ -238,7 +255,6 @@ function ftDelPasajeros(index: number) {
   LCS.remData(arrPasajeros.value, "localPasajeros", index);
 
   ftAmacenContadores()
-
 
 };
 
@@ -260,8 +276,7 @@ function descargarTXT() {
 </script>
 
 <template>
-
-  <div v-if="alt_eliminar" style="z-index: 1;"
+  <div v-if="alt_eliminar" style="z-index: 1; "
     class="d-flex justify-content-center align-items-center position-fixed bottom-0 start-50 translate-middle-x">
     <div class="alert alert-danger" role="alert">
       Se eliminó un elemento
@@ -275,14 +290,36 @@ function descargarTXT() {
     </div>
   </div>
 
+  <div v-if="alt_guardar" style="z-index: 1;"
+    class="d-flex justify-content-center align-items-center position-fixed bottom-0 start-50 translate-middle-x">
+    <div class="alert alert-info" role="alert">
+      Se ha guardado el dia
+    </div>
+  </div>
+
+  <nav class="navbar navbar-expand-md navbar-dark bg-primary position-fixed w-100 top-0 start-0" style="z-index: 1;">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">Ruta Diario</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#staticBackdrop"
+        aria-controls="staticBackdrop" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item text-light" data-bs-toggle="offcanvas" data-bs-target="#staticBackdrop"
+            aria-controls="staticBackdrop">
+            Menu
+          </li>
+        </ul>
+
+      </div>
+    </div>
+  </nav>
+
   <div class="container text-center">
     <!-- Título -->
     <h1 class="my-4">Ruta Diario</h1>
-
-    <button style="z-index: 1;" class=" btn btn-success w-25 m-3 position-fixed top-0 start-0"
-      data-bs-toggle="offcanvas" data-bs-target="#staticBackdrop" aria-controls="staticBackdrop">
-      Menu
-    </button>
 
     <div class="offcanvas offcanvas-start" data-bs-backdrop="static" tabindex="-1" id="staticBackdrop"
       aria-labelledby="staticBackdropLabel">
@@ -303,19 +340,20 @@ function descargarTXT() {
               </div>
             </li>
 
-            <li class="list-group-item my-3">
+            <!-- <li class="list-group-item my-3">
               <p>Modo Editor: interructor</p>
               <button v-if="bl_edit" class="btn btn-success" data-bs-dismiss="offcanvas"
                 @click="ftModeEdit()">Activado</button>
               <button v-if="!bl_edit" class="btn btn-danger" data-bs-dismiss="offcanvas"
                 @click="ftModeEdit()">Desativado</button>
-            </li>
+            </li> -->
 
             <li class="list-group-item my-3">
               <!-- botones caraga y descarga -->
               Botones Carga y Descarga
               <div class="my-4">
-                <button class="btn btn-dark w-100" data-bs-dismiss="offcanvas" @click="descargarTXT">Descargar</button>
+                <button class="btn btn-dark w-100" data-bs-dismiss="offcanvas" @click="descargarTXT">Descargar
+                  DB</button>
               </div>
 
               <div>
@@ -355,6 +393,37 @@ function descargarTXT() {
       </div>
     </div>
 
+    <!-- card registar datos -->
+    <div class="card mb-3">
+
+      <div class="card-header">
+        Registrar Datos
+      </div>
+
+      <div class="card-body">
+        <h5 class="card-title">Cantidades</h5>
+        <div class="card-text">
+
+          <!-- Input y botón para agregar pasajeros -->
+          <div class="my-3 d-flex justify-content-between align-items-center">
+            <label class="me-3" for="">Pasajeros</label>
+            <input pattern="[0-9]*" inputmode="numeric" v-model="nuevoPasajero" class="form-control d-inline-block w-50"
+              placeholder="Agregar pasajeros">
+          </div>
+
+          <!-- Input y botón para agregar gastos -->
+          <div class="my-3 d-flex justify-content-between align-items-center">
+            <label class="me-3" for="">Gastos</label>
+            <input pattern="[0-9]*" inputmode="numeric" v-model="nuevoGasto" class="form-control d-inline-block w-50"
+              placeholder="Agregar gastos">
+          </div>
+
+          <button :disabled="bl_agregar" class="btn btn-primary ms-2 w-100"
+            @click="ftAgregarMovimiento">Agregar</button>
+        </div>
+      </div>
+    </div>
+
     <!-- Card con la información -->
     <div class="card mb-3">
       <div class="card-header d-flex justify-content-between align-items-center">
@@ -390,36 +459,6 @@ function descargarTXT() {
       </div>
     </div>
 
-    <!-- card registar datos -->
-    <div class="card mb-3">
-
-      <div class="card-header">
-        Registrar Datos
-      </div>
-
-      <div class="card-body">
-        <h5 class="card-title">Cantidades</h5>
-        <div class="card-text">
-
-          <!-- Input y botón para agregar pasajeros -->
-          <div class="my-3 d-flex justify-content-between align-items-center">
-            <label class="me-3" for="">Pasajeros</label>
-            <input pattern="[0-9]*" inputmode="numeric" v-model="nuevoPasajero" class="form-control d-inline-block w-50"
-              placeholder="Agregar pasajeros">
-          </div>
-
-          <!-- Input y botón para agregar gastos -->
-          <div class="my-3 d-flex justify-content-between align-items-center">
-            <label class="me-3" for="">Gastos</label>
-            <input pattern="[0-9]*" inputmode="numeric" v-model="nuevoGasto" class="form-control d-inline-block w-50"
-              placeholder="Agregar gastos">
-          </div>
-
-          <button class="btn btn-primary ms-2 w-100" @click="ftAgregarMovimiento">Agregar</button>
-        </div>
-      </div>
-    </div>
-
     <!-- Tabla de pasajeros -->
     <div v-if="arrPasajeros.length" class="card my-3">
 
@@ -436,7 +475,12 @@ function descargarTXT() {
                 <th scope="col">#</th>
                 <th scope="col">Cantidad</th>
                 <th scope="col">Hora</th>
-                <th scope="col">Del</th>
+                <th scope="col">
+                  <div class="form-check form-switch d-flex justify-content-center">
+                    <input @click="ftModeEdit()" class="form-check-input form-check-input-lg" type="checkbox"
+                      role="switch" id="flexSwitchCheckDefault">
+                  </div>
+                </th>
               </tr>
             </thead>
 
@@ -474,7 +518,12 @@ function descargarTXT() {
                 <th scope="col">#</th>
                 <th scope="col">Cantidad</th>
                 <th scope="col">Hora</th>
-                <th scope="col">Del</th>
+                <th scope="col">
+                  <div class="form-check form-switch d-flex justify-content-center">
+                    <input @click="ftModeEdit()" class="form-check-input form-check-input-lg" type="checkbox"
+                      role="switch" id="flexSwitchCheckDefault">
+                  </div>
+                </th>
               </tr>
             </thead>
 
@@ -509,21 +558,20 @@ function descargarTXT() {
             <thead>
               <tr>
                 <th scope="col">fecha</th>
-                <th scope="col">Pasajeros</th>
-                <th scope="col">Gastos</th>
-                <th scope="col">Dinero</th>
-
+                <th scope="col">c/p</th>
+                <th scope="col">t/g</th>
+                <th scope="col">t/d</th>
               </tr>
             </thead>
 
             <tbody>
               <tr v-for="(item, index) in arrDias" :key="index">
                 <td @click="ftGuardandoIndex(index)" data-bs-toggle="modal" data-bs-target="#modalEditandoDia">
-                  {{
-                    item.fecha }}</td>
+                  {{ item.fecha.slice(0, 5) }}
+                </td>
                 <td>{{ item.pasajeros }}</td>
-                <td>{{ item.gastos }}</td>
-                <td>{{ item.dinero }}</td>
+                <td>{{ item.gastos > 999 ? (item.gastos / 1000).toFixed(1) + 'k' : item.gastos }}</td>
+                <td>{{ item.dinero > 999 ? (item.dinero / 1000).toFixed(1) + 'k' : item.dinero }}</td>
               </tr>
             </tbody>
 
@@ -584,7 +632,7 @@ function descargarTXT() {
         <div class="modal-body">
 
           <h5 v-if="arrDias[indexSave]">Dia a editar <span class="text-danger">{{ arrDias[indexSave].fecha
-          }}</span></h5>
+              }}</span></h5>
 
           <div class="d-flex justify-content-center align-items-center text-center">
             <label class="form-label w-25 me-2">dia
