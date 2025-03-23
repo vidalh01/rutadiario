@@ -166,6 +166,9 @@ function ftAgregarMovimiento() {
 
   showAlert(alt_agregar, "Se ha agregado un elemento");
 
+  bl_edit_pasajeros.value = false
+  bl_edit_gastos.value = false
+
 };
 
 // agregar pasajeros
@@ -256,7 +259,7 @@ function readFile(ev: Event) {
     </div>
   </div>
 
-  <nav class="navbar navbar-expand-md navbar-dark bg-primary position-fixed w-100 top-0 start-0" style="z-index: 1;">
+  <nav class="navbar navbar-expand-md navbar-dark bg-dark position-fixed w-100 top-0 start-0" style="z-index: 1;">
     <div class="container-fluid">
       <a class="navbar-brand" href="#">Ruta Diario</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#staticBackdrop"
@@ -308,10 +311,12 @@ function readFile(ev: Event) {
                   DB</button>
               </div>
 
-              <div>
-                <label class="my-4" for="">Buscar y Cargar DB</label>
-                <input data-bs-dismiss="offcanvas" type="file" @change="readFile" accept=".txt" />
+              <div class="mb-3">
+                <label class="my-4 form-control" for="">Buscar y Cargar DB</label>
+                <input type="file" data-bs-dismiss="offcanvas" class="form-control" @change="readFile" accept=".txt"
+                  aria-label="file example" required>
               </div>
+
             </li>
 
             <li class="list-group-item my-3 text-start">
@@ -430,8 +435,9 @@ function readFile(ev: Event) {
                 <th scope="col">Hora</th>
                 <th scope="col">
                   <div class="form-check form-switch d-flex justify-content-center">
-                    <input @click="ftModeEditPasajeros()" class="form-check-input form-check-input-lg" type="checkbox"
-                      role="switch" id="flexSwitchCheckDefault">
+                    <input @click="ftModeEditPasajeros()" v-model="bl_edit_pasajeros"
+                      class="form-check-input form-check-input-lg" type="checkbox" role="switch"
+                      id="flexSwitchCheckDefault">
                   </div>
                 </th>
               </tr>
@@ -462,7 +468,6 @@ function readFile(ev: Event) {
       </div>
     </div>
 
-
     <!-- Tabla de gastos -->
     <div class="card my-3">
       <div class="card-header">
@@ -480,8 +485,9 @@ function readFile(ev: Event) {
                 <th scope="col">Hora</th>
                 <th scope="col">
                   <div class="form-check form-switch d-flex justify-content-center">
-                    <input @click="ftModeEditGastos()" class="form-check-input form-check-input-lg" type="checkbox"
-                      role="switch" id="flexSwitchCheckDefault">
+                    <input @click="ftModeEditGastos()" v-model="bl_edit_gastos"
+                      class="form-check-input form-check-input-lg" type="checkbox" role="switch"
+                      id="flexSwitchCheckDefault">
                   </div>
                 </th>
               </tr>
