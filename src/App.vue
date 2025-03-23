@@ -147,9 +147,8 @@ function ftGuardarDia() {
     fecha: fechaFormateada()
   });
 
-  showAlert(alt_guardar, "Se ha guarado el dia");
-
   ftResetDia();
+  showAlert(alt_guardar, "Se ha guarado el dia");
 
 };
 
@@ -251,7 +250,7 @@ function readFile(ev: Event) {
 
 <template>
   <div v-if="mensajeAlerta !== ''" style="z-index: 1;"
-    class="d-flex justify-content-center align-items-center position-fixed top-50 start-50 translate-middle-x">
+    class="d-flex justify-content-center align-items-center position-fixed top-25 start-50 translate-middle-x my-5">
     <div class="alert alert-info text-center" role="alert">
       {{ mensajeAlerta }}
     </div>
