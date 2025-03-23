@@ -413,7 +413,7 @@ function readFile(ev: Event) {
     </div>
 
     <!-- Tabla de pasajeros -->
-    <div v-if="arrPasajeros.length" class="card my-3">
+    <div class="card my-3">
 
       <div class="card-header">
         Tabla de pasajeros
@@ -421,7 +421,7 @@ function readFile(ev: Event) {
       <div class="card-body">
         <h5 class="card-title">Pasajeros</h5>
         <div class="card-text">
-          <table class="table table-bordered table-striped my-3">
+          <table v-if="arrPasajeros.length" class="table table-bordered table-striped my-3">
 
             <thead>
               <tr>
@@ -454,23 +454,24 @@ function readFile(ev: Event) {
             </tbody>
 
           </table>
+
+          <div v-else>
+            <p>Vacio</p>
+          </div>
         </div>
       </div>
-    </div>
-    <div v-else>
-      <p class="text-center">Vacio Pasajeros</p>
     </div>
 
 
     <!-- Tabla de gastos -->
-    <div v-if="arrGastos.length" class="card my-3">
+    <div class="card my-3">
       <div class="card-header">
         Tabla de Gastos
       </div>
       <div class="card-body">
         <h5 class="card-title">Gastos</h5>
         <div class="card-text">
-          <table class="table table-bordered table-striped my-3">
+          <table v-if="arrGastos.length" class="table table-bordered table-striped my-3">
 
             <thead>
               <tr>
@@ -503,12 +504,14 @@ function readFile(ev: Event) {
             </tbody>
 
           </table>
+
+          <div v-else>
+            <p>Vacio</p>
+          </div>
         </div>
       </div>
     </div>
-    <div v-else>
-      <p class="text-center">Vacio Gastos</p>
-    </div>
+
 
     <!-- Tabla de dias -->
     <div v-if="arrDias.length" class="card my-3">
@@ -524,8 +527,8 @@ function readFile(ev: Event) {
               <tr>
                 <th scope="col">fecha</th>
                 <th scope="col">c/p</th>
-                <th scope="col">t/g</th>
-                <th scope="col">t/d</th>
+                <th scope="col">t/g-</th>
+                <th scope="col">t/d+</th>
               </tr>
             </thead>
 
