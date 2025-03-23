@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-import { onMounted, ref } from "vue";
+import { onMounted, ref, type Ref } from "vue";
 import { LCS } from "../src/class/lib_localstoraje";
 import { TM } from "../src/class/lib_time";
 import { TXT } from "./class/lib_read_save_txt";
@@ -16,13 +16,15 @@ let nuevoGasto = ref<string>("");
 let dia = ref<string>("");
 let mes = ref<string>("");
 
+let mensajeAlerta = ref<string>("");
+
 let bl_edit_pasajeros = ref<boolean>(false);
 let bl_edit_gastos = ref<boolean>(false);
-let bl_agregar = ref<boolean>(false);
-let bl_guardar = ref<boolean>(false);
 let alt_eliminar = ref<boolean>(false);
 let alt_agregar = ref<boolean>(false);
 let alt_guardar = ref<boolean>(false);
+let alt_reset = ref<boolean>(false);
+let alt_descargar = ref<boolean>(false);
 
 interface interDatos {
   count: string;
@@ -33,7 +35,7 @@ let arrPasajeros = ref<interDatos[]>([]);
 let arrGastos = ref<interDatos[]>([]);
 let arrDias = ref<any[]>([]);
 
-
+// leer archivos de texto
 function readFile(ev: Event) {
   TXT.cargar(ev).then((res) => {
     arrDias.value = JSON.parse(res)
@@ -81,6 +83,8 @@ function ftAmacenContadores() {
 
 // funcion reset
 function ftResetDia() {
+  showAlert(alt_reset, "las tablas has sido reseteadas")
+
   cantidadPasajeros.value = 0;
   cantidadGastos.value = 1600;
   dineroBruto.value = 0;
@@ -132,7 +136,6 @@ function nuevaFecha(): string {
   return `${dia.value}/${mes.value}/${year}`;
 };
 
-
 // la base de los objetos
 function objDatos(cantidad: string): interDatos {
   let datos = ref<interDatos>({
@@ -155,7 +158,7 @@ function ftGuardarDia() {
     fecha: fechaFormateada()
   });
 
-  showAlertGuardar()
+  showAlert(alt_guardar, "Se ha guarado el dia");
 
   ftResetDia();
 
@@ -173,7 +176,7 @@ function ftAgregarMovimiento() {
     agregarGastos()
   }
 
-  showAlertAgregar()
+  showAlert(alt_agregar, "Se ha agregado un elemento");
 
 };
 
@@ -205,56 +208,22 @@ function agregarGastos() {
   nuevoGasto.value = "";
 };
 
-// alerta agregar
-function showAlertAgregar() {
+function showAlert(alertVar: Ref<boolean>, mensaje: string) {
 
-  alt_agregar.value = true
-  bl_agregar.value = true
+  mensajeAlerta.value = mensaje
 
-  setTimeout(() => {
-    alt_agregar.value = false
-    bl_agregar.value = false
-  }, 3000);
-
-};
-
-// alerta agregar
-function showAlertGuardar() {
-
-  alt_guardar.value = true
-  bl_guardar.value = true
+  alertVar.value = true;
 
   setTimeout(() => {
-    alt_guardar.value = false
-    bl_guardar.value = false
+    alertVar.value = false;
+    mensajeAlerta.value = ""
   }, 3000);
-
-};
-
-// reset alerta eliminar
-function showAlertaEliminarPasajeros() {
-  alt_eliminar.value = true
-  bl_edit_pasajeros.value = true
-  setTimeout(() => {
-    alt_eliminar.value = false
-    bl_edit_pasajeros.value = false
-  }, 3000);
-};
-
-// reset alerta eliminar
-function showAlertaEliminarGastos() {
-  alt_eliminar.value = true
-  bl_edit_pasajeros.value = true
-  setTimeout(() => {
-    alt_eliminar.value = false
-    bl_edit_pasajeros.value = false
-  }, 3000);
-};
+}
 
 // borrar pasajeros
 function ftDelPasajeros(index: number) {
 
-  showAlertaEliminarPasajeros()
+  showAlert(alt_eliminar, "Se ha eliminado un elemento");
 
   LCS.remData(arrPasajeros.value, "localPasajeros", index);
 
@@ -265,7 +234,7 @@ function ftDelPasajeros(index: number) {
 //  borrar gastos
 function ftDelGastos(index: number) {
 
-  showAlertaEliminarGastos()
+  showAlert(alt_eliminar, "Se ha eliminado un elemento");
 
   LCS.remData(arrGastos.value, "localGastos", index);
 
@@ -275,29 +244,17 @@ function ftDelGastos(index: number) {
 // descargar locarstorage a txt
 function descargarTXT() {
   TXT.descargar(arrDias.value)
+
+  showAlert(alt_descargar, "La db, descargada")
 };
 
 </script>
 
 <template>
-  <div v-if="alt_eliminar" style="z-index: 1; "
-    class="d-flex justify-content-center align-items-center position-fixed bottom-0 start-50 translate-middle-x">
-    <div class="alert alert-danger" role="alert">
-      Se eliminó un elemento
-    </div>
-  </div>
-
-  <div v-if="alt_agregar" style="z-index: 1;"
-    class="d-flex justify-content-center align-items-center position-fixed bottom-0 start-50 translate-middle-x">
-    <div class="alert alert-primary" role="alert">
-      Se agrego un elemento
-    </div>
-  </div>
-
-  <div v-if="alt_guardar" style="z-index: 1;"
+  <div v-if="mensajeAlerta !== ''" style="z-index: 1;"
     class="d-flex justify-content-center align-items-center position-fixed bottom-0 start-50 translate-middle-x">
     <div class="alert alert-info" role="alert">
-      Se ha guardado el dia
+      {{ mensajeAlerta }}
     </div>
   </div>
 
@@ -338,10 +295,11 @@ function descargarTXT() {
               <!-- botones de menu -->
               botones de menu
               <div class="my-4">
-                <button class="btn btn-primary w-100 my-3" data-bs-dismiss="offcanvas" @click="ftGuardarDia">Guardar
+                <button :disabled="alt_guardar" class="btn btn-primary w-100 my-3" data-bs-dismiss="offcanvas"
+                  @click="ftGuardarDia">Guardar
                   Dia</button>
-                <button class="btn btn-danger w-100" data-bs-toggle="modal" data-bs-target="#modalResetDia"
-                  data-bs-dismiss="offcanvas" @click="ftResetDia">Reset Dia</button>
+                <button :disabled="alt_reset" class="btn btn-danger w-100" data-bs-dismiss="offcanvas"
+                  @click="ftResetDia">Reset Dia</button>
               </div>
             </li>
 
@@ -350,7 +308,8 @@ function descargarTXT() {
               <!-- botones caraga y descarga -->
               Botones Carga y Descarga
               <div class="my-4">
-                <button class="btn btn-dark w-100" data-bs-dismiss="offcanvas" @click="descargarTXT">Descargar
+                <button :disabled="alt_descargar" class="btn btn-dark w-100" data-bs-dismiss="offcanvas"
+                  @click="descargarTXT">Descargar
                   DB</button>
               </div>
 
@@ -369,21 +328,21 @@ function descargarTXT() {
                   class="bi bi-circle bg-danger rounded-circle mx-2" viewBox="0 0 16 16">
                   <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
                 </svg>
-                Control, ruta y gas
+                Control, ruta y gas: {{ 200 + 300 + 600 }}
               </div>
               <div>
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                   class="bi bi-circle bg-warning rounded-circle mx-2" viewBox="0 0 16 16">
                   <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
                 </svg>
-                Brenda
+                Brenda: 400
               </div>
               <div>
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                   class="bi bi-circle bg-success rounded-circle mx-2" viewBox="0 0 16 16">
                   <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
                 </svg>
-                Ganancias
+                Ganancias: Infinitas
               </div>
             </li>
           </ul>
@@ -416,7 +375,7 @@ function descargarTXT() {
               placeholder="Agregar gastos">
           </div>
 
-          <button :disabled="bl_agregar" class="btn btn-outline-primary ms-2 w-100"
+          <button :disabled="alt_agregar" class="btn btn-outline-primary ms-2 w-100"
             @click="ftAgregarMovimiento">Agregar</button>
         </div>
       </div>
@@ -576,7 +535,7 @@ function descargarTXT() {
 
             <tbody>
               <tr v-for="(item, index) in arrDias.slice(0, 30)" :key="index">
-                <td data-bs-toggle="modal" data-bs-target="#modalEditandoDia">
+                <td>
                   {{ item.fecha.slice(0, 5) }}
                 </td>
                 <td>{{ item.pasajeros }}</td>
@@ -586,26 +545,6 @@ function descargarTXT() {
             </tbody>
 
           </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- Modal resetdia-->
-    <div class="modal fade" id="modalResetDia" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h1 class="modal-title fs-5" id="exampleModalLabel">Reseteando...</h1>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body">
-            <div class="alert alert-danger text-center" role="alert">
-              El dia a sido reseteado
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          </div>
         </div>
       </div>
     </div>
