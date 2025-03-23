@@ -350,7 +350,6 @@ function readFile(ev: Event) {
 
     <!-- card registar datos -->
     <div class="card mb-3">
-
       <div class="card-header">
         Registrar Datos
       </div>
@@ -373,7 +372,7 @@ function readFile(ev: Event) {
               placeholder="Agregar gastos">
           </div>
 
-          <button :disabled="alt_agregar" class="btn btn-primary ms-2 w-100" @click="ftAgregarMovimiento">
+          <button :disabled="alt_agregar" class="btn btn-secondary ms-2 w-100" @click="ftAgregarMovimiento">
             <svg width="25" height="25" fill="currentColor" class="bi bi-plus-circle" viewBox="0 0 16 16">
               <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
               <path
@@ -410,13 +409,26 @@ function readFile(ev: Event) {
       </div>
       <div class="card-body">
         <h5 class="card-title"></h5>
-        <p class="card-text">
-          <strong>Cantidad de Pasajeros:</strong> {{ cantidadPasajeros }} <br>
-          <strong>Cantidad de Gastos:</strong><span class="text-danger"> ${{ cantidadGastos }}</span> <br>
-          <strong>Dinero Bruto:</strong> ${{ dineroBruto }} <br>
-          <strong>Dinero Neto:</strong> <span
-            :class="{ 'text-danger': dineroNeto < 0, 'text-success': dineroNeto > 0 }">${{ dineroNeto }}</span>
-        </p>
+        <div class="card-text row">
+          <div class="col-6">
+            <strong>Cantidad de Pasajeros:</strong> {{ cantidadPasajeros }} <br>
+          </div>
+          <div class="col-6">
+            <strong>Cantidad de Gastos:</strong><span class="text-danger"> ${{ cantidadGastos > 999 ? (cantidadGastos /
+              1000).toFixed(1) + 'k' : cantidadGastos }}</span>
+          </div>
+
+          <div class="col-6">
+            <strong>Dinero Bruto:</strong> ${{ dineroBruto > 999 ? (dineroBruto /
+              1000).toFixed(1) + 'k' : dineroBruto }}
+          </div>
+          <div class="col-6">
+            <strong>Dinero Neto:</strong> <span
+              :class="{ 'text-danger': dineroNeto < 0, 'text-success': dineroNeto > 0 }">${{ dineroNeto > 999 ?
+                (dineroNeto /
+                  1000).toFixed(1) + 'k' : dineroNeto }}</span>
+          </div>
+        </div>
       </div>
     </div>
 
