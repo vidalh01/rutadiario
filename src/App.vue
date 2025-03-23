@@ -17,9 +17,12 @@ let nuevoGasto = ref<string>("");
 
 let dia = ref<string>("");
 let mes = ref<string>("");
+let mensajeAlerta = ref<string>("");
 
-let bl_edit = ref<boolean>(false);
+let bl_edit_pasajeros = ref<boolean>(false);
+let bl_edit_gastos = ref<boolean>(false);
 let bl_agregar = ref<boolean>(false);
+let bl_guardar = ref<boolean>(false);
 let alt_eliminar = ref<boolean>(false);
 let alt_agregar = ref<boolean>(false);
 let alt_guardar = ref<boolean>(false);
@@ -45,8 +48,13 @@ function readFile(ev: Event) {
 }
 
 // interructor modo editor
-function ftModeEdit() {
-  bl_edit.value = !bl_edit.value
+function ftModeEditPasajeros() {
+  bl_edit_pasajeros.value = !bl_edit_pasajeros.value
+  console.log(bl_edit_pasajeros.value)
+}
+
+function ftModeEditGastos() {
+  bl_edit_gastos.value = !bl_edit_gastos.value
 }
 
 // al iniciar la aplicación, se obtienen los datos guardados en el localstorage
@@ -168,7 +176,8 @@ function ftGuardarDia() {
     fecha: fechaFormateada()
   });
 
-  showAlert(alt_guardar.value = true)
+  showAlertGuardar()
+
   ftResetDia();
 
 };
@@ -185,7 +194,7 @@ function ftAgregarMovimiento() {
     agregarGastos()
   }
 
-  showAlert(bl_agregar.value = true, alt_agregar.value = true)
+  showAlertAgregar()
 
 };
 
@@ -217,29 +226,56 @@ function agregarGastos() {
   nuevoGasto.value = "";
 };
 
-// reset alerta 
-function showAlert(bl1: boolean, bl2?: boolean) {
+// alerta agregar
+function showAlertAgregar() {
+
+  alt_agregar.value = true
+  bl_agregar.value = true
+
   setTimeout(() => {
-    bl1 = false
-    if (bl2) bl2 = false
+    alt_agregar.value = false
+    bl_agregar.value = false
+  }, 3000);
+
+};
+
+// alerta agregar
+function showAlertGuardar() {
+
+  alt_guardar.value = true
+  bl_guardar.value = true
+
+  setTimeout(() => {
+    alt_guardar.value = false
+    bl_guardar.value = false
+  }, 3000);
+
+};
+
+// reset alerta eliminar
+function showAlertaEliminarPasajeros() {
+  alt_eliminar.value = true
+  bl_edit_pasajeros.value = true
+  setTimeout(() => {
+    alt_eliminar.value = false
+    bl_edit_pasajeros.value = false
   }, 3000);
 };
 
-
 // reset alerta eliminar
-function resetAlertaEliminar() {
+function showAlertaEliminarGastos() {
   alt_eliminar.value = true
-  bl_edit.value = true
+  bl_edit_pasajeros.value = true
   setTimeout(() => {
     alt_eliminar.value = false
-    bl_edit.value = false
+    bl_edit_pasajeros.value = false
   }, 3000);
 };
 
 // borrar pasajeros
 function ftDelPasajeros(index: number) {
 
-  resetAlertaEliminar()
+  showAlertaEliminarPasajeros()
 
   LCS.remData(arrPasajeros.value, "localPasajeros", index);
 
@@ -250,7 +286,7 @@ function ftDelPasajeros(index: number) {
 //  borrar gastos
 function ftDelGastos(index: number) {
 
-  resetAlertaEliminar()
+  showAlertaEliminarGastos()
 
   LCS.remData(arrGastos.value, "localGastos", index);
 
@@ -325,9 +361,11 @@ function descargarTXT() {
               <div class="my-4">
                 <button class="btn btn-primary w-100 my-3" data-bs-dismiss="offcanvas" @click="ftGuardarDia">Guardar
                   Dia</button>
-                <button class="btn btn-danger w-100" data-bs-dismiss="offcanvas" @click="ftResetDia">Reset Dia</button>
+                <button class="btn btn-danger w-100" data-bs-toggle="modal" data-bs-target="#modalResetDia"
+                  data-bs-dismiss="offcanvas" @click="ftResetDia">Reset Dia</button>
               </div>
             </li>
+
 
             <li class="list-group-item my-3">
               <!-- botones caraga y descarga -->
@@ -458,7 +496,7 @@ function descargarTXT() {
                 <th scope="col">Hora</th>
                 <th scope="col">
                   <div class="form-check form-switch d-flex justify-content-center">
-                    <input @click="ftModeEdit()" class="form-check-input form-check-input-lg" type="checkbox"
+                    <input @click="ftModeEditPasajeros()" class="form-check-input form-check-input-lg" type="checkbox"
                       role="switch" id="flexSwitchCheckDefault">
                   </div>
                 </th>
@@ -470,7 +508,7 @@ function descargarTXT() {
                 <td>{{ arrPasajeros.length - index }}</td>
                 <td>{{ item.count }}</td>
                 <td>{{ item.hour }}</td>
-                <td><button :disabled="!bl_edit" class="btn btn-danger" @click="ftDelPasajeros(index)">
+                <td><button :disabled="!bl_edit_pasajeros" class="btn btn-danger" @click="ftDelPasajeros(index)">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                       class="bi bi-trash3" viewBox="0 0 16 16">
                       <path
@@ -507,7 +545,7 @@ function descargarTXT() {
                 <th scope="col">Hora</th>
                 <th scope="col">
                   <div class="form-check form-switch d-flex justify-content-center">
-                    <input @click="ftModeEdit()" class="form-check-input form-check-input-lg" type="checkbox"
+                    <input @click="ftModeEditGastos()" class="form-check-input form-check-input-lg" type="checkbox"
                       role="switch" id="flexSwitchCheckDefault">
                   </div>
                 </th>
@@ -519,7 +557,7 @@ function descargarTXT() {
                 <td>{{ arrGastos.length - index }}</td>
                 <td>{{ item.count }}</td>
                 <td>{{ item.hour }}</td>
-                <td><button :disabled="!bl_edit" class="btn btn-danger" @click="ftDelGastos(index)">
+                <td><button :disabled="!bl_edit_gastos" class="btn btn-danger" @click="ftDelGastos(index)">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                       class="bi bi-trash3" viewBox="0 0 16 16">
                       <path
@@ -573,17 +611,17 @@ function descargarTXT() {
       </div>
     </div>
 
-    <!-- Modal Dia guardado-->
-    <div class="modal fade" id="modalGuardandoDia" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <!-- Modal resetdia-->
+    <div class="modal fade" id="modalResetDia" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
-            <h1 class="modal-title fs-5" id="exampleModalLabel">Guardando Dia... </h1>
+            <h1 class="modal-title fs-5" id="exampleModalLabel">Reseteando...</h1>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            <div class="alert alert-info text-center" role="alert">
-              El dia a sido guardado
+            <div class="alert alert-danger text-center" role="alert">
+              El dia a sido reseteado
             </div>
           </div>
           <div class="modal-footer">
@@ -593,57 +631,6 @@ function descargarTXT() {
       </div>
     </div>
   </div>
-
-  <!-- Modal resetdia-->
-  <div class="modal fade" id="modalResetDia" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h1 class="modal-title fs-5" id="exampleModalLabel">Reseteando...</h1>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <div class="alert alert-danger text-center" role="alert">
-            El dia a sido reseteado
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal Editando Dia -->
-  <div class="modal fade" id="modalEditandoDia" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h1 class="modal-title fs-5" id="exampleModalLabel">Editando Dia...</h1>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-
-          <h5 v-if="arrDias[indexSave]">Dia a editar <span class="text-danger">{{ arrDias[indexSave].fecha
-              }}</span></h5>
-
-          <div class="d-flex justify-content-center align-items-center text-center">
-            <label class="form-label w-25 me-2">dia
-              <input v-model="dia" type="text" class="form-control text-center" placeholder="dia">
-            </label>
-          </div>
-
-        </div>
-        <div class="modal-footer ">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          <button type="button" @click="guardarNuevaFecha" data-bs-dismiss="modal"
-            class="btn btn-primary">Guardar</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-
 
 </template>
 
