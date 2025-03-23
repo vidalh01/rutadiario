@@ -5,8 +5,6 @@ import { LCS } from "../src/class/lib_localstoraje";
 import { TM } from "../src/class/lib_time";
 import { TXT } from "./class/lib_read_save_txt";
 
-let indexSave = ref<number>(-1);
-
 let cantidadPasajeros = ref<number>(0);
 let cantidadGastos = ref<number>(0);
 let dineroBruto = ref<number>(0);
@@ -17,7 +15,6 @@ let nuevoGasto = ref<string>("");
 
 let dia = ref<string>("");
 let mes = ref<string>("");
-let mensajeAlerta = ref<string>("");
 
 let bl_edit_pasajeros = ref<boolean>(false);
 let bl_edit_gastos = ref<boolean>(false);
@@ -144,24 +141,6 @@ function objDatos(cantidad: string): interDatos {
   });
 
   return datos.value;
-};
-
-// guardar nueva fecha
-function guardarNuevaFecha() {
-  arrDias.value[indexSave.value].fecha = nuevaFecha();
-  LCS.setData("localDias", arrDias.value);
-
-  dia.value = "";
-};
-
-
-// guardar index
-function ftGuardandoIndex(index: number) {
-  indexSave.value = index;
-
-  let mesStr = new Date().getMonth() + 1;
-  mes.value = mesStr.toString();
-
 };
 
 // guardar dia
@@ -596,8 +575,8 @@ function descargarTXT() {
             </thead>
 
             <tbody>
-              <tr v-for="(item, index) in arrDias" :key="index">
-                <td @click="ftGuardandoIndex(index)" data-bs-toggle="modal" data-bs-target="#modalEditandoDia">
+              <tr v-for="(item, index) in arrDias.slice(0, 30)" :key="index">
+                <td data-bs-toggle="modal" data-bs-target="#modalEditandoDia">
                   {{ item.fecha.slice(0, 5) }}
                 </td>
                 <td>{{ item.pasajeros }}</td>
