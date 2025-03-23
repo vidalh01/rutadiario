@@ -35,17 +35,6 @@ let arrPasajeros = ref<interDatos[]>([]);
 let arrGastos = ref<interDatos[]>([]);
 let arrDias = ref<any[]>([]);
 
-// leer archivos de texto
-function readFile(ev: Event) {
-  TXT.cargar(ev).then((res) => {
-    arrDias.value = JSON.parse(res)
-    LCS.setData("localDias", arrDias.value)
-    ftAmacenContadores()
-  }).catch((error) => {
-    console.error(error);
-  });
-}
-
 // interructor modo editor
 function ftModeEditPasajeros() {
   bl_edit_pasajeros.value = !bl_edit_pasajeros.value
@@ -66,7 +55,7 @@ onMounted(() => {
   }
 });
 
-// ft contadore
+// ft contadores
 function ftAmacenContadores() {
   arrPasajeros.value = LCS.getData("localPasajeros");
   cantidadPasajeros.value = contador("localPasajeros", arrPasajeros.value, 0);
@@ -83,7 +72,7 @@ function ftAmacenContadores() {
 
 // funcion reset
 function ftResetDia() {
-  showAlert(alt_reset, "las tablas has sido reseteadas")
+  showAlert(alt_reset, "Las tablas han sido reseteadas")
 
   cantidadPasajeros.value = 0;
   cantidadGastos.value = 1600;
@@ -222,21 +211,20 @@ function showAlert(alertVar: Ref<boolean>, mensaje: string) {
 
 // borrar pasajeros
 function ftDelPasajeros(index: number) {
-
-  showAlert(alt_eliminar, "Se ha eliminado un elemento");
-
-  LCS.remData(arrPasajeros.value, "localPasajeros", index);
-
-  ftAmacenContadores()
-
+  ftEliminarElemento(arrPasajeros, "localPasajeros", index)
 };
 
-//  borrar gastos
+// borrar gastos
 function ftDelGastos(index: number) {
+  ftEliminarElemento(arrGastos, "localGastos", index)
+};
+
+// borrar Elemento
+function ftEliminarElemento(arr: Ref<any[]>, keylocal: string, index: number) {
 
   showAlert(alt_eliminar, "Se ha eliminado un elemento");
 
-  LCS.remData(arrGastos.value, "localGastos", index);
+  LCS.remDataItem(arr.value, keylocal, index);
 
   ftAmacenContadores()
 };
@@ -248,11 +236,22 @@ function descargarTXT() {
   showAlert(alt_descargar, "La db, descargada")
 };
 
+// leer archivos de texto
+function readFile(ev: Event) {
+  TXT.cargar(ev).then((res) => {
+    arrDias.value = JSON.parse(res)
+    LCS.setData("localDias", arrDias.value)
+    ftAmacenContadores()
+  }).catch((error) => {
+    console.error(error);
+  });
+}
+
 </script>
 
 <template>
   <div v-if="mensajeAlerta !== ''" style="z-index: 1;"
-    class="d-flex justify-content-center align-items-center position-fixed bottom-0 start-50 translate-middle-x">
+    class="d-flex justify-content-center align-items-center position-fixed top-50 start-50 translate-middle-x">
     <div class="alert alert-info text-center" role="alert">
       {{ mensajeAlerta }}
     </div>
@@ -278,10 +277,7 @@ function descargarTXT() {
     </div>
   </nav>
 
-  <div class="container text-center">
-    <!-- Título -->
-    <h1 class="my-4">Ruta Diario</h1>
-
+  <div class="container text-center my-5">
     <div class="offcanvas offcanvas-start" data-bs-backdrop="static" tabindex="-1" id="staticBackdrop"
       aria-labelledby="staticBackdropLabel">
       <div class="offcanvas-header">
@@ -379,6 +375,7 @@ function descargarTXT() {
             @click="ftAgregarMovimiento">Agregar</button>
         </div>
       </div>
+
     </div>
 
     <!-- Card con la información -->
