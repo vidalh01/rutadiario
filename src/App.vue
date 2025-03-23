@@ -253,7 +253,7 @@ function descargarTXT() {
 <template>
   <div v-if="mensajeAlerta !== ''" style="z-index: 1;"
     class="d-flex justify-content-center align-items-center position-fixed bottom-0 start-50 translate-middle-x">
-    <div class="alert alert-info" role="alert">
+    <div class="alert alert-info text-center" role="alert">
       {{ mensajeAlerta }}
     </div>
   </div>
