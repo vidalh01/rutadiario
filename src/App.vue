@@ -411,22 +411,25 @@ function readFile(ev: Event) {
         <h5 class="card-title"></h5>
         <div class="card-text row">
           <div class="col-6">
-            <strong>Cantidad de Pasajeros:</strong> {{ cantidadPasajeros }} <br>
+            <strong>Pasajeros:</strong>
+            <p>{{ cantidadPasajeros }} <br></p>
           </div>
           <div class="col-6">
-            <strong>Cantidad de Gastos:</strong><span class="text-danger"> ${{ cantidadGastos > 999 ? (cantidadGastos /
-              1000).toFixed(1) + 'k' : cantidadGastos }}</span>
-          </div>
-
-          <div class="col-6">
-            <strong>Dinero Bruto:</strong> ${{ dineroBruto > 999 ? (dineroBruto /
-              1000).toFixed(1) + 'k' : dineroBruto }}
+            <strong>Gastos:</strong>
+            <p class="text-danger"> ${{ cantidadGastos > 999 ? (cantidadGastos /
+              1000).toFixed(1) + 'k' : cantidadGastos }}</p>
           </div>
           <div class="col-6">
-            <strong>Dinero Neto:</strong> <span
-              :class="{ 'text-danger': dineroNeto < 0, 'text-success': dineroNeto > 0 }">${{ dineroNeto > 999 ?
-                (dineroNeto /
-                  1000).toFixed(1) + 'k' : dineroNeto }}</span>
+            <strong>D/Bruto:</strong>
+            <p>
+              ${{ dineroBruto > 999 ? (dineroBruto /
+                1000).toFixed(1) + 'k' : dineroBruto }}
+            </p>
+          </div>
+          <div class="col-6">
+            <strong>D/Neto:</strong>
+            <p v-if="dineroNeto > 0" class="text-success">${{ (dineroNeto / 1000).toFixed(1) + 'k' }}</p>
+            <p v-if="dineroNeto < 0" class="text-danger">${{ (dineroNeto / 1000).toFixed(1) + 'k' }}</p>
           </div>
         </div>
       </div>
