@@ -253,8 +253,8 @@ function readFile(ev: Event) {
 
 <template>
   <div v-if="mensajeAlerta !== ''" style="z-index: 1;"
-    class="d-flex justify-content-center align-items-center position-fixed top-25 start-50 translate-middle-x my-5">
-    <div class="alert alert-info text-center" role="alert">
+    class="d-flex justify-content-center align-items-center position-fixed bottom-0 start-50 translate-middle-x my-5">
+    <div class="alert alert-danger text-center" role="alert">
       {{ mensajeAlerta }}
     </div>
   </div>
@@ -421,10 +421,7 @@ function readFile(ev: Event) {
           </div>
           <div class="col-6">
             <strong>D/Bruto:</strong>
-            <p>
-              ${{ dineroBruto > 999 ? (dineroBruto /
-                1000).toFixed(1) + 'k' : dineroBruto }}
-            </p>
+            <p v-if="dineroBruto > -1" class="text-success">${{ (dineroBruto / 1000).toFixed(1) + 'k' }}</p>
           </div>
           <div class="col-6">
             <strong>D/Neto:</strong>
