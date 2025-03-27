@@ -13,6 +13,8 @@ let dineroNeto = ref<number>(0);
 let nuevoPasajero = ref<string>("");
 let nuevoGasto = ref<string>("");
 
+let colorAlert = ref("");
+
 let dia = ref<string>("");
 let mes = ref<string>("");
 
@@ -72,6 +74,7 @@ function ftAmacenContadores() {
 
 // funcion reset
 function ftResetDia() {
+  colorAlert.value = "alert alert-warning text-center"
   showAlert(alt_reset, "Las tablas han sido reseteadas")
 
   cantidadPasajeros.value = 0;
@@ -148,6 +151,7 @@ function ftGuardarDia() {
   });
 
   ftResetDia();
+  colorAlert.value = "alert alert-success text-center"
   showAlert(alt_guardar, "Se ha guarado el dia");
 
 };
@@ -164,6 +168,7 @@ function ftAgregarMovimiento() {
     agregarGastos()
   }
 
+  colorAlert.value = "alert alert-primary text-center"
   showAlert(alt_agregar, "Se ha agregado un elemento");
 
   bl_edit_pasajeros.value = false
@@ -224,6 +229,7 @@ function ftDelGastos(index: number) {
 // borrar Elemento
 function ftEliminarElemento(arr: Ref<any[]>, keylocal: string, index: number) {
 
+  colorAlert.value = "alert alert-danger text-center"
   showAlert(alt_eliminar, "Se ha eliminado un elemento");
 
   LCS.remDataItem(arr.value, keylocal, index);
@@ -234,7 +240,7 @@ function ftEliminarElemento(arr: Ref<any[]>, keylocal: string, index: number) {
 // descargar locarstorage a txt
 function descargarTXT() {
   TXT.descargar(arrDias.value)
-
+  colorAlert.value = "alert alert-success text-center"
   showAlert(alt_descargar, "La db, descargada")
 };
 
@@ -254,7 +260,7 @@ function readFile(ev: Event) {
 <template>
   <div v-if="mensajeAlerta !== ''" style="z-index: 1;"
     class="d-flex justify-content-center align-items-center position-fixed bottom-0 start-50 translate-middle-x my-5">
-    <div class="alert alert-danger text-center" role="alert">
+    <div :class="colorAlert" role="alert">
       {{ mensajeAlerta }}
     </div>
   </div>
@@ -284,7 +290,7 @@ function readFile(ev: Event) {
       aria-labelledby="staticBackdropLabel">
       <div class="offcanvas-header">
         <h5 class="offcanvas-title" id="staticBackdropLabel">Menu > Ruta Diario</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        <button type="button" class="btn-close text-bg-danger" data-bs-dismiss="offcanvas" aria-label="Close"></button>
       </div>
       <div class="offcanvas-body">
         <div>
@@ -350,7 +356,7 @@ function readFile(ev: Event) {
 
     <!-- card registar datos -->
     <div class="card mb-3">
-      <div class="card-header">
+      <div class="card-header text-bg-dark">
         Registrar Datos
       </div>
 
@@ -362,17 +368,17 @@ function readFile(ev: Event) {
           <div class="my-3 d-flex justify-content-between align-items-center">
             <label class="me-3" for="">Pasajeros</label>
             <input pattern="[0-9]*" inputmode="numeric" v-model="nuevoPasajero" class="form-control d-inline-block w-50"
-              placeholder="Agregar pasajeros">
+              placeholder="Pasajeros">
           </div>
 
           <!-- Input y botón para agregar gastos -->
           <div class="my-3 d-flex justify-content-between align-items-center">
             <label class="me-3" for="">Gastos</label>
             <input pattern="[0-9]*" inputmode="numeric" v-model="nuevoGasto" class="form-control d-inline-block w-50"
-              placeholder="Agregar gastos">
+              placeholder="Gastos">
           </div>
 
-          <button :disabled="alt_agregar" class="btn btn-secondary ms-2 w-100" @click="ftAgregarMovimiento">
+          <button :disabled="alt_agregar" class="btn btn-success ms-2 w-100" @click="ftAgregarMovimiento">
             <svg width="25" height="25" fill="currentColor" class="bi bi-plus-circle" viewBox="0 0 16 16">
               <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
               <path
@@ -386,8 +392,8 @@ function readFile(ev: Event) {
 
     <!-- Card con la información -->
     <div class="card mb-3">
-      <div class="card-header d-flex justify-content-between align-items-center">
-        <label for="">Detalles Del Dia <span class="text-danger">{{ TM.fechaFormateada() }}</span></label>
+      <div class="card-header d-flex justify-content-around align-items-center text-bg-dark">
+        <label for="">Detalles Del Dia<span class="text-bg-dark mx-3">{{ TM.fechaFormateada() }}</span></label>
         <div v-if="dineroBruto < 1100">
           <svg width="16" height="16" fill="currentColor" class="bi bi-circle bg-danger rounded-circle"
             viewBox="0 0 16 16">
@@ -421,7 +427,7 @@ function readFile(ev: Event) {
           </div>
           <div class="col-6">
             <strong>D/Bruto:</strong>
-            <p v-if="dineroBruto > -1" class="text-success">${{ (dineroBruto / 1000).toFixed(1) + 'k' }}</p>
+            <p v-if="dineroBruto >= 0">${{ (dineroBruto / 1000).toFixed(1) + 'k' }}</p>
           </div>
           <div class="col-6">
             <strong>D/Neto:</strong>
@@ -435,7 +441,7 @@ function readFile(ev: Event) {
     <!-- Tabla de pasajeros -->
     <div class="card my-3">
 
-      <div class="card-header">
+      <div class="card-header text-bg-dark">
         Tabla de pasajeros
       </div>
       <div class="card-body">
@@ -484,7 +490,7 @@ function readFile(ev: Event) {
 
     <!-- Tabla de gastos -->
     <div class="card my-3">
-      <div class="card-header">
+      <div class="card-header text-bg-danger">
         Tabla de Gastos
       </div>
       <div class="card-body">
@@ -534,7 +540,7 @@ function readFile(ev: Event) {
 
     <!-- Tabla de dias -->
     <div v-if="arrDias.length" class="card my-3">
-      <div class="card-header">
+      <div class="card-header text-bg-dark">
         Tabla de Dias
       </div>
       <div class="card-body">
@@ -557,8 +563,10 @@ function readFile(ev: Event) {
                   {{ item.fecha.slice(0, 5) }}
                 </td>
                 <td>{{ item.pasajeros }}</td>
-                <td>{{ item.gastos > 999 ? (item.gastos / 1000).toFixed(1) + 'k' : item.gastos }}</td>
-                <td>{{ item.dinero > 999 ? (item.dinero / 1000).toFixed(1) + 'k' : item.dinero }}</td>
+                <td>{{ (item.gastos / 1000).toFixed(1) + 'k'
+                  }}</td>
+                <td :class="item.dinero < 0 ? 'text-danger' : 'text-success'">{{ (item.dinero / 1000).toFixed(1) + 'k'
+                  }}</td>
               </tr>
             </tbody>
 
@@ -567,6 +575,15 @@ function readFile(ev: Event) {
       </div>
     </div>
   </div>
+
+  <footer class="bg-dark text-light text-center py-3 mt-4">
+    <div class="container">
+      <p class="mb-1">Creado por Vidal Herrera &copy; <span id="year"></span></p>
+      <nav>
+        <p>Contactame<a href="https://wa.me/18293681379" class="text-light mx-2" target="_blank">WhatsApp</a></p>
+      </nav>
+    </div>
+  </footer>
 
 </template>
 
