@@ -20,10 +20,9 @@ let mensajeAlerta = ref<string>("");
 
 let bl_edit_pasajeros = ref<boolean>(false);
 let bl_edit_gastos = ref<boolean>(false);
-let alt_eliminar = ref<boolean>(false);
+let alt_danger = ref<boolean>(false);
 let alt_agregar = ref<boolean>(false);
-let alt_guardar = ref<boolean>(false);
-let alt_reset = ref<boolean>(false);
+let alt_warning = ref<boolean>(false);
 let alt_descargar = ref<boolean>(false);
 
 let arrPasajeros = ref<interDatos[]>([]);
@@ -76,7 +75,7 @@ function ftAmacenContadores() {
 // funcion reset
 function ftResetDia() {
   colorAlert.value = "alert alert-warning text-center";
-  showAlert(alt_reset, "Las tablas han sido reseteadas");
+  showAlert(alt_warning, "Las tablas han sido reseteadas");
   arrPasajeros.value = [];
   arrGastos.value = [];
   LCS.setData("localDias", arrDias.value);
@@ -114,7 +113,7 @@ function ftGuardarDia() {
   });
   ftResetDia();
   colorAlert.value = "alert alert-success text-center";
-  showAlert(alt_guardar, "Se ha guarado el dia");
+  showAlert(alt_danger, "Se ha guarado el dia");
 };
 
 // agregar movimientos
@@ -172,7 +171,7 @@ function ftDelGastos(index: number) {
 // borrar Elemento
 function ftEliminarElemento(arr: Ref<any[]>, keylocal: string, index: number) {
   colorAlert.value = "alert alert-danger text-center";
-  showAlert(alt_eliminar, "Se ha eliminado un elemento");
+  showAlert(alt_danger, "Se ha eliminado un elemento");
   LCS.remDataItem(arr.value, keylocal, index);
   ftAmacenContadores();
 };
@@ -211,7 +210,6 @@ function ftGuardarFechaEditada() {
 };
 
 </script>
-
 <template>
   <div v-if="mensajeAlerta !== ''" style="z-index: 1;"
     class="d-flex justify-content-center align-items-center position-fixed bottom-0 start-50 translate-middle-x my-5">
@@ -254,10 +252,10 @@ function ftGuardarFechaEditada() {
               <!-- botones de menu -->
               botones de menu
               <div class="my-4">
-                <button :disabled="alt_guardar" class="btn btn-light border border-2 border-primary w-100 my-3"
+                <button :disabled="alt_danger" class="btn btn-light border border-2 border-primary w-100 my-3"
                   data-bs-dismiss="offcanvas" @click="ftGuardarDia">Guardar
                   Dia</button>
-                <button :disabled="alt_reset" class="btn btn-light border border-2 border-primary w-100"
+                <button :disabled="alt_warning" class="btn btn-light border border-2 border-primary w-100"
                   data-bs-dismiss="offcanvas" @click="ftResetDia">Reset Dia</button>
               </div>
             </li>
@@ -486,10 +484,10 @@ function ftGuardarFechaEditada() {
                         </td>
                         <td>{{ item.pasajeros }}</td>
                         <td>{{ (item.gastos / 1000).toFixed(1) + 'k'
-                          }}</td>
+                        }}</td>
                         <td :class="item.dinero < 0 ? 'text-danger' : 'text-success'">{{ (item.dinero / 1000).toFixed(1)
                           + 'k'
-                          }}</td>
+                        }}</td>
                       </tr>
                     </tbody>
 
