@@ -15,15 +15,11 @@ let newmes = ref<number>(1);
 
 let nuevoPasajero = ref<string>("");
 let nuevoGasto = ref<string>("");
-let colorAlert = ref<string>("");
 let mensajeAlerta = ref<string>("");
 
 let bl_edit_pasajeros = ref<boolean>(false);
 let bl_edit_gastos = ref<boolean>(false);
-let alt_danger = ref<boolean>(false);
-let alt_agregar = ref<boolean>(false);
-let alt_warning = ref<boolean>(false);
-let alt_descargar = ref<boolean>(false);
+let alt_active = ref<boolean>(false);
 
 let arrPasajeros = ref<interDatos[]>([]);
 let arrGastos = ref<interDatos[]>([]);
@@ -74,8 +70,8 @@ function ftAmacenContadores() {
 
 // funcion reset
 function ftResetDia() {
-  colorAlert.value = "alert alert-warning text-center";
-  showAlert(alt_warning, "Las tablas han sido reseteadas");
+
+  showAlert(alt_active, "Las tablas han sido reseteadas");
   arrPasajeros.value = [];
   arrGastos.value = [];
   LCS.setData("localDias", arrDias.value);
@@ -112,15 +108,13 @@ function ftGuardarDia() {
     fecha: TM.fechaFormateada()
   });
   ftResetDia();
-  colorAlert.value = "alert alert-success text-center";
-  showAlert(alt_danger, "Se ha guarado el dia");
+  showAlert(alt_active, "Se ha guarado el dia");
 };
 
 // agregar movimientos
 function ftAgregarMovimiento() {
   if (nuevoPasajero.value !== "") agregarPasajeros();
   if (nuevoGasto.value !== "") agregarGastos();
-  showAlert(alt_agregar, "Se ha agregado un elemento");
   bl_edit_pasajeros.value = false;
   bl_edit_gastos.value = false;
 
@@ -128,7 +122,7 @@ function ftAgregarMovimiento() {
 
 // agregar pasajeros
 function agregarPasajeros() {
-  colorAlert.value = "alert alert-primary text-center"
+  showAlert(alt_active, "Se han agregado pasajeros");
   cantidadPasajeros.value += parseInt(nuevoPasajero.value);
   dineroBruto.value = cantidadPasajeros.value * 35;
   dineroNeto.value = dineroBruto.value - cantidadGastos.value;
@@ -139,7 +133,7 @@ function agregarPasajeros() {
 
 // agregar gastos
 function agregarGastos() {
-  colorAlert.value = "alert alert-danger text-center"
+  showAlert(alt_active, "Se ha agregado un gasto");
   cantidadGastos.value += parseInt(nuevoGasto.value);
   dineroNeto.value = dineroBruto.value - cantidadGastos.value;
   arrGastos.value.unshift(objDatos(nuevoGasto.value));
@@ -155,7 +149,7 @@ function showAlert(alertVar: Ref<boolean>, mensaje: string) {
   setTimeout(() => {
     alertVar.value = false;
     mensajeAlerta.value = "";
-  }, 3000);
+  }, 1500);
 }
 
 // borrar pasajeros
@@ -170,8 +164,8 @@ function ftDelGastos(index: number) {
 
 // borrar Elemento
 function ftEliminarElemento(arr: Ref<any[]>, keylocal: string, index: number) {
-  colorAlert.value = "alert alert-danger text-center";
-  showAlert(alt_danger, "Se ha eliminado un elemento");
+  ;
+  showAlert(alt_active, "Se ha eliminado un elemento");
   LCS.remDataItem(arr.value, keylocal, index);
   ftAmacenContadores();
 };
@@ -179,8 +173,7 @@ function ftEliminarElemento(arr: Ref<any[]>, keylocal: string, index: number) {
 // descargar locarstorage a txt
 function descargarTXT() {
   TXT.descargar(arrDias.value);
-  colorAlert.value = "alert alert-success text-center";
-  showAlert(alt_descargar, "La db, descargada");
+  showAlert(alt_active, "La db, descargada");
 };
 
 // leer archivos de texto
@@ -213,7 +206,7 @@ function ftGuardarFechaEditada() {
 <template>
   <div v-if="mensajeAlerta !== ''" style="z-index: 1;"
     class="d-flex justify-content-center align-items-center position-fixed bottom-0 start-50 translate-middle-x my-5">
-    <div :class="colorAlert" role="alert">
+    <div class="alert alert-warning text-center" role="alert">
       {{ mensajeAlerta }}
     </div>
   </div>
@@ -252,10 +245,10 @@ function ftGuardarFechaEditada() {
               <!-- botones de menu -->
               botones de menu
               <div class="my-4">
-                <button :disabled="alt_danger" class="btn btn-light border border-2 border-primary w-100 my-3"
+                <button :disabled="alt_active" class="btn btn-light border border-2 border-primary w-100 my-3"
                   data-bs-dismiss="offcanvas" @click="ftGuardarDia">Guardar
                   Dia</button>
-                <button :disabled="alt_warning" class="btn btn-light border border-2 border-primary w-100"
+                <button :disabled="alt_active" class="btn btn-light border border-2 border-primary w-100"
                   data-bs-dismiss="offcanvas" @click="ftResetDia">Reset Dia</button>
               </div>
             </li>
@@ -264,7 +257,7 @@ function ftGuardarFechaEditada() {
               <!-- botones caraga y descarga -->
               Botones Carga y Descarga
               <div class="my-4">
-                <button :disabled="alt_descargar" class="btn btn-light border border-2 border-primary w-100"
+                <button :disabled="alt_active" class="btn btn-light border border-2 border-primary w-100"
                   data-bs-dismiss="offcanvas" @click="descargarTXT">Descargar
                   DB</button>
               </div>
@@ -305,7 +298,7 @@ function ftGuardarFechaEditada() {
               placeholder="Gastos">
           </div>
 
-          <button :disabled="alt_agregar" class="btn btn-success ms-2 w-100" @click="ftAgregarMovimiento">
+          <button :disabled="alt_active" class="btn btn-success ms-2 w-100" @click="ftAgregarMovimiento">
             <svg width="25" height="25" fill="currentColor" class="bi bi-plus-circle" viewBox="0 0 16 16">
               <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
               <path
@@ -384,7 +377,8 @@ function ftGuardarFechaEditada() {
                   <td>{{ arrPasajeros.length - index }}</td>
                   <td>{{ item.count }}</td>
                   <td>{{ item.hour }}</td>
-                  <td><button :disabled="!bl_edit_pasajeros" class="btn btn-danger" @click="ftDelPasajeros(index)">
+                  <td><button :disabled="!bl_edit_pasajeros || alt_active" class="btn btn-danger"
+                      @click="ftDelPasajeros(index)">
                       <svg width="16" height="16" fill="currentColor" class="bi bi-trash3" viewBox="0 0 16 16">
                         <path
                           d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5M11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47M8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5" />
@@ -432,7 +426,8 @@ function ftGuardarFechaEditada() {
                   <td>{{ arrGastos.length - index }}</td>
                   <td>{{ item.count }}</td>
                   <td>{{ item.hour }}</td>
-                  <td><button :disabled="!bl_edit_gastos" class="btn btn-danger" @click="ftDelGastos(index)">
+                  <td><button :disabled="!bl_edit_gastos || alt_active" class="btn btn-danger"
+                      @click="ftDelGastos(index)">
                       <svg width="16" height="16" fill="currentColor" class="bi bi-trash3" viewBox="0 0 16 16">
                         <path
                           d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5M11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47M8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5" />
@@ -443,7 +438,6 @@ function ftGuardarFechaEditada() {
               </tbody>
 
             </table>
-
             <div v-else>
               <p>Vacio</p>
             </div>
