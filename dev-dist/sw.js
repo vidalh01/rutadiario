@@ -82,7 +82,7 @@ define(['./workbox-54d0af47'], (function (workbox) { 'use strict';
     "revision": "6a2ba150252587b77d135127c9759c69"
   }, {
     "url": "/rutadiario/index.html",
-    "revision": "0.3t2u08469p8"
+    "revision": "0.vkjbk9up2o8"
   }], {});
   workbox.cleanupOutdatedCaches();
   workbox.registerRoute(new workbox.NavigationRoute(workbox.createHandlerBoundToURL("/rutadiario/index.html"), {
