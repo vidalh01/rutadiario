@@ -10,6 +10,8 @@ let cantidadGastos = ref<number>(0);
 let dineroBruto = ref<number>(0);
 let dineroNeto = ref<number>(0);
 let standarGastos = ref<number>(0);
+let newdia = ref<number>(1);
+let newmes = ref<number>(1);
 
 let nuevoPasajero = ref<string>("");
 let nuevoGasto = ref<string>("");
@@ -28,25 +30,27 @@ let arrPasajeros = ref<interDatos[]>([]);
 let arrGastos = ref<interDatos[]>([]);
 let arrDias = ref<any[]>([]);
 
+let dataObjetoItemDia: any = null;
+
 interface interDatos {
   count: string;
   hour: string;
 }
 
-
 // interructor modo editor
 function ftModeEditPasajeros() {
   bl_edit_pasajeros.value = !bl_edit_pasajeros.value
-  console.log(bl_edit_pasajeros.value)
+  console.log(bl_edit_pasajeros.value);
 }
+
 // modo editor des/activo
 function ftModeEditGastos() {
-  bl_edit_gastos.value = !bl_edit_gastos.value
+  bl_edit_gastos.value = !bl_edit_gastos.value;
 }
 
 // al iniciar la aplicación, se obtienen los datos guardados en el localstorage
 onMounted(() => {
-  ftAmacenContadores()
+  ftAmacenContadores();
 });
 
 // ft contadores
@@ -71,14 +75,14 @@ function ftAmacenContadores() {
 
 // funcion reset
 function ftResetDia() {
-  colorAlert.value = "alert alert-warning text-center"
-  showAlert(alt_reset, "Las tablas han sido reseteadas")
+  colorAlert.value = "alert alert-warning text-center";
+  showAlert(alt_reset, "Las tablas han sido reseteadas");
   arrPasajeros.value = [];
   arrGastos.value = [];
   LCS.setData("localDias", arrDias.value);
   LCS.setData("localPasajeros", arrPasajeros.value);
   LCS.setData("localGastos", arrGastos.value);
-  ftAmacenContadores()
+  ftAmacenContadores();
 };
 
 // contador
@@ -109,17 +113,17 @@ function ftGuardarDia() {
     fecha: TM.fechaFormateada()
   });
   ftResetDia();
-  colorAlert.value = "alert alert-success text-center"
+  colorAlert.value = "alert alert-success text-center";
   showAlert(alt_guardar, "Se ha guarado el dia");
 };
 
 // agregar movimientos
 function ftAgregarMovimiento() {
-  if (nuevoPasajero.value !== "") agregarPasajeros()
-  if (nuevoGasto.value !== "") agregarGastos()
+  if (nuevoPasajero.value !== "") agregarPasajeros();
+  if (nuevoGasto.value !== "") agregarGastos();
   showAlert(alt_agregar, "Se ha agregado un elemento");
-  bl_edit_pasajeros.value = false
-  bl_edit_gastos.value = false
+  bl_edit_pasajeros.value = false;
+  bl_edit_gastos.value = false;
 
 };
 
@@ -143,51 +147,68 @@ function agregarGastos() {
   LCS.setData("localGastos", arrGastos.value);
   nuevoGasto.value = "";
 };
+
 // mostrar alerta
 function showAlert(alertVar: Ref<boolean>, mensaje: string) {
-  mensajeAlerta.value = mensaje
+  mensajeAlerta.value = mensaje;
   alertVar.value = true;
 
   setTimeout(() => {
     alertVar.value = false;
-    mensajeAlerta.value = ""
+    mensajeAlerta.value = "";
   }, 3000);
 }
 
 // borrar pasajeros
 function ftDelPasajeros(index: number) {
-  ftEliminarElemento(arrPasajeros, "localPasajeros", index)
+  ftEliminarElemento(arrPasajeros, "localPasajeros", index);
 };
 
 // borrar gastos
 function ftDelGastos(index: number) {
-  ftEliminarElemento(arrGastos, "localGastos", index)
+  ftEliminarElemento(arrGastos, "localGastos", index);
 };
 
 // borrar Elemento
 function ftEliminarElemento(arr: Ref<any[]>, keylocal: string, index: number) {
-  colorAlert.value = "alert alert-danger text-center"
+  colorAlert.value = "alert alert-danger text-center";
   showAlert(alt_eliminar, "Se ha eliminado un elemento");
   LCS.remDataItem(arr.value, keylocal, index);
-  ftAmacenContadores()
+  ftAmacenContadores();
 };
 
 // descargar locarstorage a txt
 function descargarTXT() {
-  TXT.descargar(arrDias.value)
-  colorAlert.value = "alert alert-success text-center"
-  showAlert(alt_descargar, "La db, descargada")
+  TXT.descargar(arrDias.value);
+  colorAlert.value = "alert alert-success text-center";
+  showAlert(alt_descargar, "La db, descargada");
 };
 
 // leer archivos de texto
 function readFile(ev: Event) {
   TXT.cargar(ev).then((res) => {
     arrDias.value = JSON.parse(res)
-    LCS.setData("localDias", arrDias.value)
-    ftAmacenContadores()
-  }).catch((error) => console.error(error))
-
+    LCS.setData("localDias", arrDias.value);
+    ftAmacenContadores();
+  }).catch((error) => console.error(error));
 }
+
+// editar fecha
+function ftEditarFecha(index: number, item: any) {
+  let fecha = new Date();
+  newdia.value = fecha.getDate();
+  newmes.value = fecha.getMonth() + 1;
+  dataObjetoItemDia = item;
+};
+
+//  Guardar Fecha Editada
+function ftGuardarFechaEditada() {
+  const formatNumero = (num: number) => (num < 10 ? "0" + num : num);
+  let dia = formatNumero(newdia.value);
+  let mes = formatNumero(newmes.value);
+  dataObjetoItemDia.fecha = `${dia}/${mes}`
+  LCS.setData("localDias", arrDias.value);
+};
 
 </script>
 
@@ -219,7 +240,7 @@ function readFile(ev: Event) {
     </div>
   </nav>
 
-  <div class="container text-center my-5">
+  <div class="container-flud text-center my-5">
     <div class="offcanvas offcanvas-end text-bg-dark" tabindex="-1" id="staticBackdrop"
       aria-labelledby="staticBackdropLabel">
       <div class="offcanvas-header">
@@ -459,8 +480,8 @@ function readFile(ev: Event) {
                     </thead>
 
                     <tbody>
-                      <tr v-for="(item, index) in arrDias.slice(0, 30)" :key="index">
-                        <td>
+                      <tr v-for="(item, index) in arrDias" :key="index">
+                        <td @click="ftEditarFecha(index, item)" data-bs-toggle="modal" data-bs-target="#ModalEditarDia">
                           {{ item.fecha.slice(0, 5) }}
                         </td>
                         <td>{{ item.pasajeros }}</td>
@@ -481,6 +502,33 @@ function readFile(ev: Event) {
       </div>
     </div>
 
+  </div>
+
+  <!-- Modal -->
+  <div class="modal fade" id="ModalEditarDia" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5">Editar Fecha</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body d-flex justify-content-center text-center">
+          <div class="mb-3">
+            <label class="form-label">Dia</label>
+            <input v-model="newdia" type="number" min="1" max="31" class="form-control text-center" placeholder="Dia">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Mes</label>
+            <input v-model="newmes" type="number" min="1" max="12" class="form-control text-center" placeholder="Mes">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" @click="ftGuardarFechaEditada" data-bs-dismiss="modal">Save
+            changes</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <footer class="text-bg-dark text-center py-3 mt-4">
