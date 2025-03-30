@@ -335,12 +335,11 @@ function ftGuardarFechaEditada() {
           </div>
           <div class="col-6">
             <strong>D/Bruto:</strong>
-            <p v-if="dineroBruto >= 0">${{ (dineroBruto / 1000).toFixed(1) + 'k' }}</p>
+            <p>${{ (dineroBruto / 1000).toFixed(1) + 'k' }}</p>
           </div>
           <div class="col-6">
             <strong>D/Neto:</strong>
-            <p v-if="dineroNeto > 0" class="text-success">${{ (dineroNeto / 1000).toFixed(1) + 'k' }}</p>
-            <p v-if="dineroNeto < 0" class="text-danger">${{ (dineroNeto / 1000).toFixed(1) + 'k' }}</p>
+            <p :class="dineroNeto > 0 ? 'text-success' : ' text-danger'">${{ (dineroNeto / 1000).toFixed(1) + 'k' }}</p>
           </div>
         </div>
       </div>
