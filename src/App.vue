@@ -35,7 +35,6 @@ interface interDatos {
 // interructor modo editor
 function ftModeEditPasajeros() {
   bl_edit_pasajeros.value = !bl_edit_pasajeros.value
-  console.log(bl_edit_pasajeros.value);
 }
 
 // modo editor des/activo
@@ -74,9 +73,9 @@ function ftResetDia() {
   showAlert(alt_active, "Las tablas han sido reseteadas");
   arrPasajeros.value = [];
   arrGastos.value = [];
-  LCS.setData("localDias", arrDias.value);
-  LCS.setData("localPasajeros", arrPasajeros.value);
-  LCS.setData("localGastos", arrGastos.value);
+  LCS.setData(arrDias.value, "localDias");
+  LCS.setData(arrPasajeros.value, "localPasajeros");
+  LCS.setData(arrGastos.value, "localGastos");
   ftAmacenContadores();
 };
 
@@ -126,8 +125,7 @@ function agregarPasajeros() {
   cantidadPasajeros.value += parseInt(nuevoPasajero.value);
   dineroBruto.value = cantidadPasajeros.value * 35;
   dineroNeto.value = dineroBruto.value - cantidadGastos.value;
-  arrPasajeros.value.unshift(objDatos(nuevoPasajero.value));
-  LCS.setData("localPasajeros", arrPasajeros.value);
+  LCS.addDataItem(arrPasajeros.value, "localPasajeros", objDatos(nuevoPasajero.value), true)
   nuevoPasajero.value = "";
 };
 
@@ -136,8 +134,7 @@ function agregarGastos() {
   showAlert(alt_active, "Se ha agregado un gasto");
   cantidadGastos.value += parseInt(nuevoGasto.value);
   dineroNeto.value = dineroBruto.value - cantidadGastos.value;
-  arrGastos.value.unshift(objDatos(nuevoGasto.value));
-  LCS.setData("localGastos", arrGastos.value);
+  LCS.addDataItem(arrGastos.value, "localGastos", objDatos(nuevoGasto.value), true)
   nuevoGasto.value = "";
 };
 
@@ -164,7 +161,6 @@ function ftDelGastos(index: number) {
 
 // borrar Elemento
 function ftEliminarElemento(arr: Ref<any[]>, keylocal: string, index: number) {
-  ;
   showAlert(alt_active, "Se ha eliminado un elemento");
   LCS.remDataItem(arr.value, keylocal, index);
   ftAmacenContadores();
@@ -180,7 +176,7 @@ function descargarTXT() {
 function readFile(ev: Event) {
   TXT.cargar(ev).then((res) => {
     arrDias.value = JSON.parse(res)
-    LCS.setData("localDias", arrDias.value);
+    LCS.setData(arrDias.value, "localDias");
     ftAmacenContadores();
   }).catch((error) => console.error(error));
 }
@@ -199,7 +195,7 @@ function ftGuardarFechaEditada() {
   let dia = formatNumero(newdia.value);
   let mes = formatNumero(newmes.value);
   dataObjetoItemDia.fecha = `${dia}/${mes}`
-  LCS.setData("localDias", arrDias.value);
+  LCS.setData(arrDias.value, "localDias");
 };
 
 </script>
